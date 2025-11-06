@@ -94,3 +94,47 @@ export async function uploadHtmlToBlob(
     throw new Error('Failed to upload report to storage. Please try again.');
   }
 }
+
+export async function uploadJsonToBlob(
+  jsonContent: string,
+  fileName: string
+): Promise<string> {
+  try {
+    const blobServiceClient = getBlobServiceClient();
+    const containerClient = blobServiceClient.getContainerClient(containerName);
+
+    await containerClient.createIfNotExists({
+      access: 'blob'
+    });
+
+    const blockBlobClient = containerClient.getBlockBlobClient(fileName);
+
+    logger.info({ 
+      fileName, 
+      containerName, 
+      contentLength: jsonContent.length 
+    }, 'Uploading JSON to blob storage');
+
+    await blockBlobClient.upload(jsonContent, Buffer.byteLength(jsonContent), {
+      blobHTTPHeaders: {
+        blobContentType: 'application/json; charset=utf-8',
+        blobCacheControl: 'public, max-age=3600'
+      }
+    });
+
+    // Generate URL with SAS token
+    const accountKey = process.env.AZURE_STORAGE_ACCOUNT_KEY;
+    const sasToken = generateSasToken(fileName, accountKey);
+    
+    const blobUrl = sasToken 
+      ? `${blockBlobClient.url}?${sasToken}`
+      : blockBlobClient.url;
+
+    logger.info({ blobUrl: blobUrl.substring(0, 80) + '...' }, 'JSON uploaded successfully with SAS token');
+
+    return blobUrl;
+  } catch (error) {
+    logger.error({ error, fileName }, 'Failed to upload JSON to blob storage');
+    throw new Error('Failed to upload JSON to storage. Please try again.');
+  }
+}

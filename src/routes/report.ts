@@ -4,7 +4,7 @@ import { AppError } from '../middleware/errors.js';
 import { extractTextFromPdf } from '../services/pdf.js';
 import { analyzePdfWithOpenAI } from '../services/aiService.js';
 import { generateDashboardHtml } from '../services/htmlExporter.js';
-import { uploadHtmlToBlob } from '../services/storageService.js';
+import { uploadHtmlToBlob, uploadJsonToBlob } from '../services/storageService.js';
 import { logger } from '../config/logger.js';
 
 const router = Router();
@@ -50,13 +50,19 @@ router.post('/generate-report', upload.single('file'), async (req: Request, res:
     const blobFileName = `report_${timestamp}_${sanitizedFileName}.html`;
     const reportUrl = await uploadHtmlToBlob(htmlContent, blobFileName);
 
-    logger.info({ reportUrl }, 'Report generated successfully');
+    // Step 4.5: Upload JSON analysis to Blob Storage
+    const jsonFileName = `report_${timestamp}_${sanitizedFileName}.json`;
+    const jsonContent = JSON.stringify(analysisResult, null, 2);
+    const jsonUrl = await uploadJsonToBlob(jsonContent, jsonFileName);
+
+    logger.info({ reportUrl, jsonUrl }, 'Report and JSON generated successfully');
 
     // Step 5: Return response
     res.json({
       status: 'success',
       data: {
         reportUrl,
+        jsonUrl,
         analysis: analysisResult
       }
     });

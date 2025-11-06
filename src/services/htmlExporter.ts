@@ -193,7 +193,8 @@ export function generateDashboardHtml(result: AnalysisResult): string {
         <div class="d-flex align-items-center gap-2">
           <span class="badge-env">Producción</span>
           <button class="btn-export" onclick="exportHTML()"><i class="bi bi-download"></i> Exportar HTML</button>
-          <button class="btn-export" style="background: #6c757d;" onclick="downloadJSON()"><i class="bi bi-file-earmark-code"></i> Descargar JSON</button>
+          <button class="btn-export" style="background: #6c757d;" onclick="showJsonModal()"><i class="bi bi-eye"></i> Ver JSON</button>
+          <button class="btn-export" style="background: #28a745;" onclick="downloadJSON()"><i class="bi bi-file-earmark-code"></i> Descargar JSON</button>
         </div>
       </header>
 
@@ -333,6 +334,34 @@ export function generateDashboardHtml(result: AnalysisResult): string {
 
       </section>
     </main>
+  </div>
+
+  <!-- JSON Modal -->
+  <div id="jsonModal" class="modal" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6);">
+    <div style="background-color: white; margin: 5% auto; padding: 20px; border-radius: 8px; width: 80%; max-width: 900px; max-height: 80vh; overflow: hidden; display: flex; flex-direction: column;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 2px solid var(--primary); padding-bottom: 10px;">
+        <h3 style="margin: 0; color: var(--primary);">
+          <i class="bi bi-file-earmark-code"></i> Análisis Completo (JSON)
+        </h3>
+        <button onclick="closeJsonModal()" style="background: transparent; border: none; font-size: 24px; cursor: pointer; color: #666;">
+          <i class="bi bi-x-circle"></i>
+        </button>
+      </div>
+      <div style="flex: 1; overflow-y: auto; background: #f5f5f5; border-radius: 4px; padding: 15px;">
+        <pre id="jsonContent" style="margin: 0; white-space: pre-wrap; word-wrap: break-word; font-size: 12px; font-family: 'Courier New', monospace;"></pre>
+      </div>
+      <div style="margin-top: 15px; display: flex; gap: 10px; justify-content: flex-end;">
+        <button class="btn-export" onclick="copyJsonToClipboard()" style="background: #6c757d;">
+          <i class="bi bi-clipboard"></i> Copiar al portapapeles
+        </button>
+        <button class="btn-export" onclick="downloadJSON()">
+          <i class="bi bi-download"></i> Descargar JSON
+        </button>
+        <button class="btn-export" onclick="closeJsonModal()" style="background: #dc3545;">
+          <i class="bi bi-x-lg"></i> Cerrar
+        </button>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -507,15 +536,65 @@ export function generateDashboardHtml(result: AnalysisResult): string {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
+        const timestamp = new Date().toISOString().split('T')[0];
         const clientSafe = (analysisJson?.clientName || 'client').toString().replace(/\s+/g, '-');
-  a.download = 'analysis-' + clientSafe + '.json';
+        a.download = 'analysis-' + clientSafe + '-' + timestamp + '.json';
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
+        closeJsonModal();
       } catch (e) {
         console.error('Failed to download JSON', e);
       }
+    }
+
+    function showJsonModal() {
+      const content = document.getElementById('jsonContent');
+      if (content) {
+        content.textContent = JSON.stringify(analysisJson, null, 2);
+      }
+      const modal = document.getElementById('jsonModal');
+      if (modal) {
+        modal.style.display = 'block';
+      }
+    }
+
+    function closeJsonModal() {
+      const modal = document.getElementById('jsonModal');
+      if (modal) {
+        modal.style.display = 'none';
+      }
+    }
+
+    function copyJsonToClipboard() {
+      try {
+        const jsonString = JSON.stringify(analysisJson, null, 2);
+        navigator.clipboard.writeText(jsonString).then(() => {
+          alert('JSON copiado al portapapeles exitosamente!');
+        }).catch(() => {
+          alert('Error al copiar al portapapeles');
+        });
+      } catch (e) {
+        console.error('Failed to copy JSON', e);
+        alert('Error al copiar al portapapeles');
+      }
+    }
+
+    // Event listeners for modal
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        closeJsonModal();
+      }
+    });
+
+    const modal = document.getElementById('jsonModal');
+    if (modal) {
+      modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+          closeJsonModal();
+        }
+      });
     }
   </script>
 </body>
