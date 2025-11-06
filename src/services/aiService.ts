@@ -36,7 +36,7 @@ function truncateTextToTokenLimit(text: string, maxTokens: number): string {
 
 const SYSTEM_PROMPT = `Eres un experto consultor senior en DevOps, transformación digital y arquitectura de Azure con certificación en Well-Architected Framework. Analiza el siguiente documento de evaluación DevOps y proporciona un análisis integral siguiendo los estándares CMMI y los pilares del Azure Well-Architected Framework.
 
-Debes responder ÚNICAMENTE con un objeto JSON válido siguiendo EXACTAMENTE esta estructura:
+⚠️ IMPORTANTE: Debes responder ÚNICAMENTE con un objeto JSON válido siguiendo EXACTAMENTE esta estructura. NO OMITAS NINGÚN CAMPO. Los campos con valores literales (como diasLaboralesPorSemana: 5, diasLaborables: ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"], horasPorDia: 8) DEBEN incluirse tal cual en tu respuesta:
 
 {
   "cliente": "Nombre del cliente extraído del documento (si no aparece, usa 'Cliente Genérico')",
@@ -126,10 +126,11 @@ Debes responder ÚNICAMENTE con un objeto JSON válido siguiendo EXACTAMENTE est
     }
   ],
   "planTrabajo": {
-    "horasMaximas": 400,
+    "horasMaximas": 450,
     "periodoMaximoMeses": 4,
     "horasSemanalesPorRecurso": 40,
     "diasLaboralesPorSemana": 5,
+    "diasLaborables": ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"],
     "horasPorDia": 8,
     "resumenRoles": [
       {
@@ -156,13 +157,12 @@ Debes responder ÚNICAMENTE con un objeto JSON válido siguiendo EXACTAMENTE est
     "tareasDetalladas": [
       {
         "id_tarea": "T1",
-        "descripcion": "Descripción detallada de la tarea alineada con las recomendaciones",
+        "descripcion": "Descripción detallada de la tarea",
         "horas_estimadas": <número>,
         "dependencia": "",
         "rol": "Arquitecto Cloud|DevOps Engineer|QA Engineer|PM",
         "fase": "MES_1|MES_2|MES_3|MES_4",
-        "prioridad": "ALTA|MEDIA|BAJA",
-        "recomendacion_id": 1
+        "prioridad": "ALTA|MEDIA|BAJA"
       },
       {
         "id_tarea": "T2",
@@ -171,8 +171,7 @@ Debes responder ÚNICAMENTE con un objeto JSON válido siguiendo EXACTAMENTE est
         "dependencia": "T1",
         "rol": "DevOps Engineer",
         "fase": "MES_1",
-        "prioridad": "ALTA",
-        "recomendacion_id": 2
+        "prioridad": "ALTA"
       }
     ]
   },
@@ -254,9 +253,10 @@ REGLAS CRÍTICAS:
 2. **Niveles CMMI**: INICIAL (0-30), GESTIONADO (31-60), DEFINIDO (61-85), OPTIMIZADO (86-100)
 
 3. **Plan de Trabajo**: 
-   - Total de horas DEBE ser <= 400
+   - Total de horas flexible según complejidad y madurez: HASTA 450 horas máximo
+   - Ajustar las horas según nivel de madurez de la empresa y complejidad de las recomendaciones
    - Periodo de 4 meses
-   - **OBLIGATORIO**: Incluir campos "diasLaboralesPorSemana": 5 y "horasPorDia": 8 en el objeto planTrabajo
+   - **OBLIGATORIO**: Incluir campos "diasLaboralesPorSemana": 5, "diasLaborables": ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"] y "horasPorDia": 8 en el objeto planTrabajo
    - Jornada laboral: LUNES A VIERNES (5 días/semana, 8 horas/día)
    - Distribuir entre 4 roles OBLIGATORIOS:
      * Arquitecto Cloud
@@ -264,8 +264,8 @@ REGLAS CRÍTICAS:
      * QA Engineer
      * PM (Project Manager)
    - **CRÍTICO**: Generar EXACTAMENTE entre 15-20 tareas detalladas (no menos de 15)
-   - **OBLIGATORIO**: Cada tarea DEBE incluir el campo "recomendacion_id" con el número de la recomendación relacionada (1-15)
-   - Las tareas deben estar alineadas con las recomendaciones
+   - Las tareas NO deben incluir campo recomendacion_id
+   - Las tareas deben ser específicas y accionables basadas en el análisis general
    - Calcular horas basándose en las recomendaciones priorizadas
    - Usar dependencias lógicas (T1, T2, etc.)
 
@@ -279,7 +279,15 @@ REGLAS CRÍTICAS:
 
 6. **Contenido específico**: Todas las observaciones y descripciones deben ser contextuales al cliente, no genéricas
 
-7. **Coherencia**: Los puntajes de capacidadWAF deben reflejar el nivel de madurezGlobal`;
+7. **Coherencia**: Los puntajes de capacidadWAF deben reflejar el nivel de madurezGlobal
+
+8. **VALIDACIÓN FINAL - NO OLVIDES ESTOS CAMPOS**:
+   - planTrabajo DEBE tener: "diasLaboralesPorSemana": 5
+   - planTrabajo DEBE tener: "diasLaborables": ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"]
+   - planTrabajo DEBE tener: "horasPorDia": 8
+   - planTrabajo DEBE tener: "horasMaximas": <hasta 450 según complejidad>
+   - Las tareas NO deben tener campo recomendacion_id
+   - Verifica estos campos antes de responder`;
 
 export async function analyzePdfWithOpenAI(pdfText: string): Promise<AnalysisResult> {
   try {
