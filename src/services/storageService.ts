@@ -1,4 +1,4 @@
-import { BlobServiceClient } from '@azure/storage-blob';
+import { BlobServiceClient, BlobSASPermissions, generateBlobSASQueryParameters, StorageSharedKeyCredential } from '@azure/storage-blob';
 import { DefaultAzureCredential } from '@azure/identity';
 import { logger } from '../config/logger.js';
 
@@ -20,6 +20,36 @@ function getBlobServiceClient(): BlobServiceClient {
   return new BlobServiceClient(blobServiceUrl, credential);
 }
 
+function generateSasToken(blobName: string, accountKey?: string): string {
+  if (!accountKey) {
+    logger.warn('No account key available, returning URL without SAS');
+    return '';
+  }
+
+  try {
+    const sharedKeyCredential = new StorageSharedKeyCredential(accountName, accountKey);
+    
+    // SAS token válido por 7 días
+    const sasOptions = {
+      containerName,
+      blobName,
+      permissions: BlobSASPermissions.parse('r'), // Read only
+      startsOn: new Date(),
+      expiresOn: new Date(new Date().valueOf() + 7 * 24 * 60 * 60 * 1000), // 7 days
+    };
+
+    const sasToken = generateBlobSASQueryParameters(
+      sasOptions,
+      sharedKeyCredential
+    ).toString();
+
+    return sasToken;
+  } catch (error) {
+    logger.error({ error }, 'Failed to generate SAS token');
+    return '';
+  }
+}
+
 export async function uploadHtmlToBlob(
   htmlContent: string,
   fileName: string
@@ -28,24 +58,35 @@ export async function uploadHtmlToBlob(
     const blobServiceClient = getBlobServiceClient();
     const containerClient = blobServiceClient.getContainerClient(containerName);
 
-    // Ensure container exists
+    // Ensure container exists (private access now)
     await containerClient.createIfNotExists({
-      access: 'blob' // Public read access for blobs
+      access: 'blob'
     });
 
     const blockBlobClient = containerClient.getBlockBlobClient(fileName);
 
-    logger.info({ fileName, containerName }, 'Uploading HTML to blob storage');
+    logger.info({ 
+      fileName, 
+      containerName, 
+      contentLength: htmlContent.length 
+    }, 'Uploading HTML to blob storage');
 
     await blockBlobClient.upload(htmlContent, Buffer.byteLength(htmlContent), {
       blobHTTPHeaders: {
-        blobContentType: 'text/html',
+        blobContentType: 'text/html; charset=utf-8',
         blobCacheControl: 'public, max-age=3600'
       }
     });
 
-    const blobUrl = blockBlobClient.url;
-    logger.info({ blobUrl }, 'HTML uploaded successfully');
+    // Generate URL with SAS token
+    const accountKey = process.env.AZURE_STORAGE_ACCOUNT_KEY;
+    const sasToken = generateSasToken(fileName, accountKey);
+    
+    const blobUrl = sasToken 
+      ? `${blockBlobClient.url}?${sasToken}`
+      : blockBlobClient.url;
+
+    logger.info({ blobUrl: blobUrl.substring(0, 80) + '...' }, 'HTML uploaded successfully with SAS token');
 
     return blobUrl;
   } catch (error) {
