@@ -27,77 +27,88 @@ export function generateDashboardHtml(result: AnalysisResult): string {
 
   const cssContent = readFileSync(join(__dirname, 'report-template.css'), 'utf-8');
   
-  const dimensionesData = result.capabilityAreas;
-  const recomendacionesData = result.workPlan;
-  const promedio = result.overallScore;
-  const objetivo = result.potentialScore;
+  // Map new Spanish/WAF structure
+  const dimensionesData = result.capacidadWAF;
+  const tareasData = result.planTrabajo.tareasDetalladas;
+  const promedio = result.resumenEjecutivo.madurezGlobal;
   
-  // Calculate evolution (5 points from current to potential)
-  const incrementoPorMes = (objetivo - promedio) / 4;
+  // Use proyeccionEvolucion for evolution chart
   const evolucion = [
-    Math.round(promedio),
-    Math.round(promedio + incrementoPorMes),
-    Math.round(promedio + incrementoPorMes * 2),
-    Math.round(promedio + incrementoPorMes * 3),
-    Math.round(objetivo)
+    promedio,
+    ...result.proyeccionEvolucion.map(p => p.madurezEsperada)
   ];
 
-  // Generate sections for each capability area
-  const areaSectionsHtml = result.capabilityAreas.map((area) => {
-    const sectionKey = area.area.toLowerCase()
+  const objetivo = evolucion[evolucion.length - 1];
+
+  // Generate sections for each WAF pillar
+  const areaSectionsHtml = result.capacidadWAF.map((pilar) => {
+    const sectionKey = pilar.pilar.toLowerCase()
       .replace(/\s+/g, '')
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '');
     
+    // Convert 0-5 scale to 0-100 for display
+    const puntajeDisplay = Math.round((pilar.puntaje / 5) * 100);
+    
     return `
         <div class="grid-2 mt-3 d-none" id="section-${sectionKey}">
           <div class="panel">
-            <div class="panel-title"><span>${escapeHtml(area.area)}</span></div>
+            <div class="panel-title"><span>${escapeHtml(pilar.pilar)}</span></div>
             <div class="mb-3">
-              <div class="kpi-value" style="font-size: 48px;">${area.score} %</div>
-              <div class="kpi-sub">Nivel: <strong>${area.level}</strong></div>
+              <div class="kpi-value" style="font-size: 48px;">${puntajeDisplay} %</div>
+              <div class="kpi-sub">Nivel: <strong>${pilar.nivelCMMI}</strong> | Puntaje: ${pilar.puntaje}/5</div>
             </div>
-            <h5 class="small-text" style="font-weight: bold;">Evaluación</h5>
-            <p class="small-text">${escapeHtml(area.assessment)}</p>
-            <h5 class="small-text mt-3" style="font-weight: bold;">Recomendaciones</h5>
-            <p class="small-text">${escapeHtml(area.recommendations)}</p>
+            <h5 class="small-text" style="font-weight: bold;">Observaciones</h5>
+            <p class="small-text">${escapeHtml(pilar.observaciones)}</p>
           </div>
           <div class="panel">
-            <div class="panel-title"><span>Nivel CMMI</span></div>
-            ${result.cmmiLevelsExplanation.map(lvl => `
-              <div class="mb-2 ${lvl.level === area.level ? 'p-2' : ''}" style="${lvl.level === area.level ? 'background: #E6F3FF; border-left: 3px solid var(--primary);' : ''}">
-                <strong class="small-text">${lvl.level}</strong> <span class="small-text">(${lvl.scoreRange})</span>
-                <p class="small-text mb-0">${escapeHtml(lvl.description)}</p>
-              </div>
-            `).join('')}
+            <div class="panel-title"><span>Niveles CMMI</span></div>
+            <div class="mb-2 ${pilar.nivelCMMI === 'INICIAL' ? 'p-2' : ''}" style="${pilar.nivelCMMI === 'INICIAL' ? 'background: #FFE6E6; border-left: 3px solid #D13438;' : ''}">
+              <strong class="small-text">INICIAL</strong> <span class="small-text">(0-30)</span>
+              <p class="small-text mb-0">Procesos impredecibles, poco controlados y reactivos.</p>
+            </div>
+            <div class="mb-2 ${pilar.nivelCMMI === 'GESTIONADO' ? 'p-2' : ''}" style="${pilar.nivelCMMI === 'GESTIONADO' ? 'background: #FFF4E6; border-left: 3px solid #FF8C00;' : ''}">
+              <strong class="small-text">GESTIONADO</strong> <span class="small-text">(31-60)</span>
+              <p class="small-text mb-0">Los procesos se planifican y ejecutan de acuerdo con políticas.</p>
+            </div>
+            <div class="mb-2 ${pilar.nivelCMMI === 'DEFINIDO' ? 'p-2' : ''}" style="${pilar.nivelCMMI === 'DEFINIDO' ? 'background: #E6F3FF; border-left: 3px solid #0078D4;' : ''}">
+              <strong class="small-text">DEFINIDO</strong> <span class="small-text">(61-85)</span>
+              <p class="small-text mb-0">Los procesos están bien caracterizados y entendidos.</p>
+            </div>
+            <div class="mb-2 ${pilar.nivelCMMI === 'OPTIMIZADO' ? 'p-2' : ''}" style="${pilar.nivelCMMI === 'OPTIMIZADO' ? 'background: #E6F7E6; border-left: 3px solid #107C10;' : ''}">
+              <strong class="small-text">OPTIMIZADO</strong> <span class="small-text">(86-100)</span>
+              <p class="small-text mb-0">La organización se enfoca en la mejora continua del rendimiento.</p>
+            </div>
           </div>
         </div>`;
   }).join('');
 
-  // Generate Azure Services section
-  const azureServicesHtml = result.azureServiceRecommendations.length > 0 ? `
-        <div class="mt-3 d-none" id="section-azureservices">
+  // Generate Recommendations section
+  const recomendacionesHtml = result.recomendaciones.length > 0 ? `
+        <div class="mt-3 d-none" id="section-recomendaciones-lista">
           <div class="panel">
-            <div class="panel-title"><span>Servicios Azure Recomendados</span></div>
+            <div class="panel-title"><span>Recomendaciones Prioritarias</span></div>
             <div class="table-responsive">
               <table class="table table-sm table-hover align-middle mb-0">
                 <thead class="table-light">
                   <tr>
-                    <th scope="col">Servicio</th>
-                    <th scope="col">Resumen</th>
-                    <th scope="col">VNet Integration</th>
-                    <th scope="col">Pricing</th>
-                    <th scope="col">Documentación</th>
+                    <th scope="col">ID</th>
+                    <th scope="col">Descripción</th>
+                    <th scope="col">Servicio Azure</th>
+                    <th scope="col">Prioridad</th>
+                    <th scope="col">Impacto Esperado</th>
+                    <th scope="col">Esfuerzo</th>
                   </tr>
                 </thead>
                 <tbody class="small-text">
-                  ${result.azureServiceRecommendations.map(svc => `
+                  ${result.recomendaciones.map(rec => `
                     <tr>
-                      <td><strong>${escapeHtml(svc.service)}</strong></td>
-                      <td>${escapeHtml(svc.summary)}</td>
-                      <td>${escapeHtml(svc.vnetIntegration)}</td>
-                      <td>${escapeHtml(svc.pricing)}</td>
-                      <td><a href="${escapeHtml(svc.url)}" target="_blank" class="btn btn-sm btn-link">Ver docs</a></td>
+                      <td><strong>${rec.id}</strong></td>
+                      <td>${escapeHtml(rec.descripcion)}</td>
+                      <td>${escapeHtml(rec.servicioAzure)}</td>
+                      <td><span class="badge bg-${rec.prioridad === 'ALTA' ? 'danger' : rec.prioridad === 'MEDIA' ? 'warning' : 'secondary'}">${rec.prioridad}</span></td>
+                      <td>${escapeHtml(rec.impactoEsperado)}</td>
+                      <td><span class="badge bg-${rec.esfuerzo === 'ALTO' ? 'danger' : rec.esfuerzo === 'MEDIO' ? 'warning' : 'success'}">${rec.esfuerzo}</span></td>
                     </tr>
                   `).join('')}
                 </tbody>
@@ -106,48 +117,75 @@ export function generateDashboardHtml(result: AnalysisResult): string {
           </div>
         </div>` : '';
 
-  // Generate Architecture section
-  const architectureHtml = `
-        <div class="mt-3 d-none" id="section-architecture">
+  // Generate Projection section
+  const proyeccionHtml = `
+        <div class="mt-3 d-none" id="section-proyeccion">
           <div class="panel">
-            <div class="panel-title"><span>${escapeHtml(result.azureArchitecture.title)}</span></div>
-            <p class="small-text mb-3">${escapeHtml(result.azureArchitecture.description)}</p>
-            <div class="panel-title mt-3"><span>Diagrama de Arquitectura</span></div>
-            <pre class="small-text p-3" style="background: #F5F5F5; border-radius: 4px; overflow-x: auto;">${escapeHtml(result.azureArchitecture.diagram)}</pre>
-            <div class="panel-title mt-3"><span>Servicios en la Arquitectura</span></div>
-            <ul class="small-text mb-0">
-              ${result.azureArchitecture.services.map(svc => `
-                <li><strong>${escapeHtml(svc.name)}:</strong> ${escapeHtml(svc.role)}</li>
-              `).join('')}
-            </ul>
+            <div class="panel-title"><span>Proyección de Evolución (4 meses)</span></div>
+            ${result.proyeccionEvolucion.map(proy => `
+              <div class="mb-3 p-3" style="background: #F5F5F5; border-radius: 4px;">
+                <h6 class="small-text" style="font-weight: bold;">Mes ${proy.mes} - Madurez esperada: ${proy.madurezEsperada}%</h6>
+                <p class="small-text mb-2"><strong>Capacidades a implementar:</strong></p>
+                <ul class="small-text mb-2">
+                  ${proy.capacidadesImplementadas.map(cap => `<li>${escapeHtml(cap)}</li>`).join('')}
+                </ul>
+                <p class="small-text mb-1"><strong>KPIs esperados:</strong></p>
+                <ul class="small-text mb-0">
+                  <li><strong>Lead Time:</strong> ${escapeHtml(proy.kpisEsperados.leadTime)}</li>
+                  <li><strong>Deployment Frequency:</strong> ${escapeHtml(proy.kpisEsperados.deploymentFrequency)}</li>
+                  <li><strong>Change Failure Rate:</strong> ${escapeHtml(proy.kpisEsperados.changeFailureRate)}</li>
+                </ul>
+              </div>
+            `).join('')}
           </div>
         </div>`;
 
-  // Navigation items for capability areas
-  const navItemsHtml = result.capabilityAreas.map((area, idx) => {
-    const sectionKey = area.area.toLowerCase()
+  // Generate Roadmap section
+  const roadmapHtml = `
+        <div class="mt-3 d-none" id="section-roadmap">
+          <div class="panel">
+            <div class="panel-title"><span>Roadmap de Implementación (${result.planTrabajo.horasMaximas}h ≈ ${result.planTrabajo.periodoMaximoMeses} meses)</span></div>
+            ${result.roadmap.map(rm => `
+              <div class="mb-3 p-3" style="background: #E6F3FF; border-left: 4px solid #0078D4; border-radius: 4px;">
+                <h6 class="small-text" style="font-weight: bold;">Mes ${rm.mes}</h6>
+                <p class="small-text mb-2"><strong>Entregables:</strong></p>
+                <ul class="small-text mb-2">
+                  ${rm.entregables.map(ent => `<li>${escapeHtml(ent)}</li>`).join('')}
+                </ul>
+                <p class="small-text mb-1"><strong>Objetivos:</strong></p>
+                <ul class="small-text mb-0">
+                  ${rm.objetivos.map(obj => `<li>${escapeHtml(obj)}</li>`).join('')}
+                </ul>
+              </div>
+            `).join('')}
+          </div>
+        </div>`;
+
+  // Navigation items for WAF pillars
+  const navItemsHtml = result.capacidadWAF.map((pilar, idx) => {
+    const sectionKey = pilar.pilar.toLowerCase()
       .replace(/\s+/g, '')
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '');
     
     const icons = [
-      'bi-card-checklist', 'bi-git', 'bi-robot', 'bi-cloud',
-      'bi-shield-lock', 'bi-gear', 'bi-activity', 'bi-people'
+      'bi-star', 'bi-shield-lock', 'bi-heart-pulse', 'bi-piggy-bank',
+      'bi-clipboard-check', 'bi-speedometer2', 'bi-people', 'bi-tree'
     ];
     
     return `
       <div class="nav-item" data-section-key="${sectionKey}" onclick="switchSection('${sectionKey}')">
-        <i class="bi ${icons[idx] || 'bi-circle'}"></i> <span>${escapeHtml(area.area)}</span>
+        <i class="bi ${icons[idx] || 'bi-circle'}"></i> <span>${escapeHtml(pilar.pilar)}</span>
       </div>`;
   }).join('');
 
-  const totalHours = recomendacionesData.reduce((sum, item) => sum + item.hours, 0);
+  const totalHours = result.planTrabajo.horasMaximas;
 
   const html = `<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>Dashboard DevOps - ${escapeHtml(result.clientName)}</title>
+  <title>Dashboard DevOps - ${escapeHtml(result.cliente)}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
@@ -170,14 +208,14 @@ export function generateDashboardHtml(result: AnalysisResult): string {
         <i class="bi bi-grid-1x2"></i> <span>Panel general</span>
       </div>
       ${navItemsHtml}
-      <div class="nav-item" data-section-key="azureservices" onclick="switchSection('azureservices')">
-        <i class="bi bi-cloud-check"></i> <span>Servicios Azure</span>
+      <div class="nav-item" data-section-key="recomendaciones-lista" onclick="switchSection('recomendaciones-lista')">
+        <i class="bi bi-lightbulb"></i> <span>Recomendaciones</span>
       </div>
-      <div class="nav-item" data-section-key="architecture" onclick="switchSection('architecture')">
-        <i class="bi bi-diagram-3"></i> <span>Arquitectura</span>
+      <div class="nav-item" data-section-key="proyeccion" onclick="switchSection('proyeccion')">
+        <i class="bi bi-graph-up-arrow"></i> <span>Proyección 4 meses</span>
       </div>
       <div class="nav-item" data-section-key="roadmap" onclick="switchSection('roadmap')">
-        <i class="bi bi-kanban"></i> <span>Roadmap ${Math.ceil(totalHours / 160)} meses</span>
+        <i class="bi bi-kanban"></i> <span>Roadmap ${result.planTrabajo.periodoMaximoMeses} meses</span>
       </div>
       <div class="nav-item" data-section-key="fuente" onclick="switchSection('fuente')">
         <i class="bi bi-filetype-pdf"></i> <span>Fuente: Documento</span>
@@ -187,8 +225,8 @@ export function generateDashboardHtml(result: AnalysisResult): string {
     <main class="main-view">
       <header class="topbar">
         <div>
-          <div class="topbar-title">Evaluación de Madurez DevOps - ${escapeHtml(result.clientName)}</div>
-          <div class="small-text">${escapeHtml(result.executiveSummary.substring(0, 150))}...</div>
+          <div class="topbar-title">Evaluación de Madurez DevOps - ${escapeHtml(result.cliente)}</div>
+          <div class="small-text">${escapeHtml(result.resumenEjecutivo.diagnostico.substring(0, 150))}...</div>
         </div>
         <div class="d-flex align-items-center gap-2">
           <span class="badge-env">Producción</span>
@@ -206,26 +244,26 @@ export function generateDashboardHtml(result: AnalysisResult): string {
             <div class="kpi-sub">Objetivo a 4 meses: ${objetivo}%</div>
           </div>
           <div class="kpi">
-            <div class="kpi-label"><i class="bi bi-stack"></i> ${escapeHtml(dimensionesData[2]?.area || 'CI/CD')}</div>
-            <div class="kpi-value">${dimensionesData[2]?.score || 0}%</div>
-            <div class="kpi-sub">${dimensionesData[2]?.level || 'N/A'}</div>
+            <div class="kpi-label"><i class="bi bi-award"></i> Nivel Predominante</div>
+            <div class="kpi-value" style="font-size: 24px;">${result.resultadoGlobal.nivelPredominante}</div>
+            <div class="kpi-sub">Puntuación: ${result.resultadoGlobal.puntuacionTotal}%</div>
           </div>
           <div class="kpi">
-            <div class="kpi-label"><i class="bi bi-shield-check"></i> ${escapeHtml(dimensionesData[4]?.area || 'Seguridad')}</div>
-            <div class="kpi-value">${dimensionesData[4]?.score || 0}%</div>
-            <div class="kpi-sub">${dimensionesData[4]?.level || 'N/A'}</div>
+            <div class="kpi-label"><i class="bi bi-exclamation-triangle"></i> Áreas Críticas</div>
+            <div class="kpi-value" style="font-size: 32px;">${result.resultadoGlobal.areasCriticas.length}</div>
+            <div class="kpi-sub">${escapeHtml(result.resultadoGlobal.areasCriticas[0] || 'N/A')}</div>
           </div>
           <div class="kpi">
-            <div class="kpi-label"><i class="bi bi-cloud-arrow-up"></i> ${escapeHtml(dimensionesData[3]?.area || 'Infraestructura')}</div>
-            <div class="kpi-value">${dimensionesData[3]?.score || 0}%</div>
-            <div class="kpi-sub">${dimensionesData[3]?.level || 'N/A'}</div>
+            <div class="kpi-label"><i class="bi bi-check-circle"></i> Áreas Fuertes</div>
+            <div class="kpi-value" style="font-size: 32px;">${result.resultadoGlobal.areasFuertes.length}</div>
+            <div class="kpi-sub">${escapeHtml(result.resultadoGlobal.areasFuertes[0] || 'N/A')}</div>
           </div>
         </div>
 
         <div class="grid-2 mt-3" id="section-dashboard">
           <div class="panel">
             <div class="panel-title">
-              <span>Radar CMMI (${dimensionesData.length} dimensiones)</span>
+              <span>Radar WAF (${dimensionesData.length} pilares)</span>
               <span class="small-text">Niveles CMMI</span>
             </div>
             <div class="chart-wrapper">
@@ -234,7 +272,7 @@ export function generateDashboardHtml(result: AnalysisResult): string {
           </div>
           <div class="panel">
             <div class="panel-title">
-              <span>Distribución por capacidad</span>
+              <span>Distribución por pilar WAF</span>
               <span class="small-text">Vista Power BI</span>
             </div>
             <div class="chart-wrapper">
@@ -257,74 +295,56 @@ export function generateDashboardHtml(result: AnalysisResult): string {
             <div class="panel-title">
               <span>Resumen Ejecutivo</span>
             </div>
-            <p class="small-text">${escapeHtml(result.executiveSummary)}</p>
+            <p class="small-text"><strong>Diagnóstico:</strong> ${escapeHtml(result.resumenEjecutivo.diagnostico)}</p>
+            <p class="small-text mt-2"><strong>Hallazgos principales:</strong></p>
+            <ul class="small-text">
+              ${result.resumenEjecutivo.hallazgosPrincipales.map(h => `<li>${escapeHtml(h)}</li>`).join('')}
+            </ul>
+            <p class="small-text mt-2"><strong>Impacto en el negocio:</strong> ${escapeHtml(result.resumenEjecutivo.impactoNegocio)}</p>
             <div class="small-text mt-3">• Fecha de exportación: <span id="now"></span></div>
-            <div class="small-text">• Total horas estimadas: <strong>${totalHours}h</strong> (aprox. ${Math.ceil(totalHours / 160)} meses)</div>
+            <div class="small-text">• Total horas estimadas: <strong>${totalHours}h</strong> (aprox. ${result.planTrabajo.periodoMaximoMeses} meses)</div>
           </div>
         </div>
 
         ${areaSectionsHtml}
-        ${azureServicesHtml}
-        ${architectureHtml}
-
-        <div class="mt-3 d-none" id="section-roadmap">
-          <div class="panel mb-3">
-            <div class="panel-title">
-              <span>Roadmap de implementación (${totalHours}h ≈ ${Math.ceil(totalHours / 160)} meses)</span>
-              <span class="small-text">Roles: Arquitecto Cloud, DevOps, QA, PM</span>
-            </div>
-            <div class="table-responsive">
-              <table class="table table-sm table-hover align-middle mb-0">
-                <thead class="table-light">
-                  <tr>
-                    <th scope="col">ID</th>
-                    <th scope="col">Actividad</th>
-                    <th scope="col">Horas</th>
-                    <th scope="col">Dependencia</th>
-                    <th scope="col">Rol</th>
-                  </tr>
-                </thead>
-                <tbody class="small-text">
-                  ${recomendacionesData.map(item => `
-                    <tr>
-                      <td>${escapeHtml(item.id)}</td>
-                      <td>${escapeHtml(item.task)}</td>
-                      <td>${item.hours}</td>
-                      <td>${escapeHtml(item.dependency || '—')}</td>
-                      <td>${escapeHtml(item.role)}</td>
-                    </tr>
-                  `).join('')}
-                  <tr class="table-info fw-semibold">
-                    <td></td>
-                    <td>Total estimado</td>
-                    <td>${totalHours}h</td>
-                    <td>—</td>
-                    <td>—</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
+        ${recomendacionesHtml}
+        ${proyeccionHtml}
+        ${roadmapHtml}
 
         <div class="mt-3 d-none" id="section-fuente">
           <div class="panel">
             <div class="panel-title"><span>Fuente de datos</span></div>
-            <p class="small-text mb-1">Este dashboard se generó a partir de un documento PDF analizado por un modelo de IA generativa (Azure OpenAI - GPT-4o).</p>
+            <p class="small-text mb-1">Este dashboard se generó a partir de un documento PDF analizado por un modelo de IA generativa (Azure OpenAI - GPT-5-mini).</p>
             <p class="small-text mb-1">La estructura aplica la guía: <strong>Microsoft Azure Learning Paths</strong>, <strong>Azure Well-Architected Framework</strong>, <strong>Cloud Adoption Framework</strong> y <strong>Microsoft DevOps Practices</strong>.</p>
             <div class="mt-3">
+              <h6 class="small-text" style="font-weight: bold;">Cliente</h6>
+              <p class="small-text mb-2">${escapeHtml(result.cliente)}</p>
+              <h6 class="small-text" style="font-weight: bold;">Evaluador</h6>
+              <p class="small-text mb-2">${escapeHtml(result.evaluador)}</p>
+              <h6 class="small-text" style="font-weight: bold;">Fecha de Assessment</h6>
+              <p class="small-text mb-2">${escapeHtml(result.fechaAssessment)}</p>
               <h6 class="small-text" style="font-weight: bold;">Niveles de Madurez CMMI</h6>
-              ${result.cmmiLevelsExplanation.map(lvl => `
-                <div class="mb-2">
-                  <strong class="small-text">${lvl.level}</strong> <span class="small-text">(${lvl.scoreRange})</span>
-                  <p class="small-text mb-0">${escapeHtml(lvl.description)}</p>
-                </div>
-              `).join('')}
+              <div class="mb-2">
+                <strong class="small-text">INICIAL (0-30):</strong>
+                <p class="small-text mb-0">Procesos impredecibles, poco controlados y reactivos.</p>
+              </div>
+              <div class="mb-2">
+                <strong class="small-text">GESTIONADO (31-60):</strong>
+                <p class="small-text mb-0">Los procesos se planifican y ejecutan de acuerdo con políticas.</p>
+              </div>
+              <div class="mb-2">
+                <strong class="small-text">DEFINIDO (61-85):</strong>
+                <p class="small-text mb-0">Los procesos están bien caracterizados y entendidos.</p>
+              </div>
+              <div class="mb-2">
+                <strong class="small-text">OPTIMIZADO (86-100):</strong>
+                <p class="small-text mb-0">La organización se enfoca en la mejora continua del rendimiento.</p>
+              </div>
             </div>
           </div>
         </div>
 
-        <div class="table-wrap mt-3" id="section-recomendaciones">
+        <div class="table-wrap mt-3" id="section-tareas">
           <div class="panel-title mb-2">
             <span>Plan de trabajo detallado (${totalHours}h)</span>
             <span class="small-text">Filtrable y paginado</span>
@@ -369,23 +389,23 @@ export function generateDashboardHtml(result: AnalysisResult): string {
   const promedio = ${promedio};
   const objetivo = ${objetivo};
   const evolucion = ${escapeJson(evolucion)};
-  const recomendaciones = ${escapeJson(recomendacionesData)};
+  const tareas = ${escapeJson(tareasData)};
   // Full AI analysis JSON (original response) - available for download
   const analysisJson = ${escapeJson(result)};
 
     document.addEventListener("DOMContentLoaded", function() {
       document.getElementById("now").innerText = new Date().toLocaleString("es-ES", { dateStyle: "full", timeStyle: "short" });
 
-      // Radar Chart
+      // Radar Chart - convert 0-5 to 0-100 for display
       const radarCtx = document.getElementById("radar");
       new Chart(radarCtx, {
         type: "radar",
         data: {
-          labels: dimensiones.map(d => d.area),
+          labels: dimensiones.map(d => d.pilar),
           datasets: [
             {
               label: "Estado actual",
-              data: dimensiones.map(d => d.score),
+              data: dimensiones.map(d => Math.round((d.puntaje / 5) * 100)),
               fill: true,
               backgroundColor: "rgba(0,120,212,0.25)",
               borderColor: "rgba(0,120,212,1)",
@@ -394,7 +414,7 @@ export function generateDashboardHtml(result: AnalysisResult): string {
             },
             {
               label: "Objetivo 4 meses",
-              data: dimensiones.map(d => Math.min(100, d.score + (objetivo - promedio))),
+              data: dimensiones.map(d => Math.min(100, Math.round((d.puntaje / 5) * 100) + (objetivo - promedio))),
               fill: true,
               backgroundColor: "rgba(142,76,198,0.12)",
               borderColor: "rgba(142,76,198,.9)",
@@ -422,18 +442,19 @@ export function generateDashboardHtml(result: AnalysisResult): string {
       // Bar Chart
       const barCtx = document.getElementById("bars");
       const barColors = dimensiones.map(d => {
-        if (d.score >= 86) return "rgba(16,124,16,0.8)";
-        if (d.score >= 61) return "rgba(0,120,212,0.8)";
-        if (d.score >= 31) return "rgba(255,140,0,0.8)";
+        const score = Math.round((d.puntaje / 5) * 100);
+        if (score >= 86) return "rgba(16,124,16,0.8)";
+        if (score >= 61) return "rgba(0,120,212,0.8)";
+        if (score >= 31) return "rgba(255,140,0,0.8)";
         return "rgba(209,52,56,0.8)";
       });
       new Chart(barCtx, {
         type: "bar",
         data: {
-          labels: dimensiones.map(d => d.area),
+          labels: dimensiones.map(d => d.pilar),
           datasets: [{ 
             label: "Nivel (%)", 
-            data: dimensiones.map(d => d.score), 
+            data: dimensiones.map(d => Math.round((d.puntaje / 5) * 100)), 
             backgroundColor: barColors
           }]
         },
@@ -479,21 +500,28 @@ export function generateDashboardHtml(result: AnalysisResult): string {
 
       // Tabulator Table
       new Tabulator("#rec-table", {
-        data: recomendaciones,
+        data: tareas,
         layout: "fitDataStretch",
         pagination: true,
         paginationSize: 10,
         columns: [
-          { title: "ID", field: "id", width: 80, resizable: false },
-          { title: "Tarea", field: "task", minWidth: 300, formatter: "textarea" },
-          { title: "Horas", field: "hours", hozAlign: "right", width: 100, resizable: false },
-          { title: "Dependencia", field: "dependency", width: 120, resizable: false },
-          { title: "Rol", field: "role", minWidth: 150, headerFilter: "select", headerFilterParams: {
+          { title: "ID", field: "id_tarea", width: 80, resizable: false },
+          { title: "Descripción", field: "descripcion", minWidth: 300, formatter: "textarea" },
+          { title: "Horas", field: "horas_estimadas", hozAlign: "right", width: 100, resizable: false },
+          { title: "Dependencia", field: "dependencia", width: 120, resizable: false },
+          { title: "Rol", field: "rol", minWidth: 150, headerFilter: "select", headerFilterParams: {
             "": "Todos",
             "Arquitecto Cloud": "Arquitecto Cloud",
             "Ingeniero DevOps": "Ingeniero DevOps",
             "Ingeniero QA": "Ingeniero QA",
             "PM": "PM"
+          }},
+          { title: "Fase", field: "fase", width: 150 },
+          { title: "Prioridad", field: "prioridad", width: 100, headerFilter: "select", headerFilterParams: {
+            "": "Todas",
+            "ALTA": "ALTA",
+            "MEDIA": "MEDIA",
+            "BAJA": "BAJA"
           }}
         ]
       });
@@ -504,9 +532,9 @@ export function generateDashboardHtml(result: AnalysisResult): string {
       document.querySelectorAll(".main-view .content-area > [id^='section-']").forEach(el => el.classList.add('d-none'));
       document.querySelector('.nav-item[data-section-key="' + sectionKey + '"]')?.classList.add("active");
       
-      const recTable = document.getElementById('section-recomendaciones');
-      if (recTable && sectionKey !== 'roadmap' && sectionKey !== 'fuente') {
-        recTable.classList.remove('d-none');
+      const tareasTable = document.getElementById('section-tareas');
+      if (tareasTable && sectionKey !== 'roadmap' && sectionKey !== 'fuente' && sectionKey !== 'proyeccion' && sectionKey !== 'recomendaciones-lista') {
+        tareasTable.classList.remove('d-none');
       }
 
       if (sectionKey === 'dashboard') {
@@ -522,7 +550,7 @@ export function generateDashboardHtml(result: AnalysisResult): string {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = "dashboard-devops-${result.clientName.replace(/\s+/g, '-')}.html";
+      a.download = "dashboard-devops-${result.cliente.replace(/\s+/g, '-')}.html";
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -537,7 +565,7 @@ export function generateDashboardHtml(result: AnalysisResult): string {
         const a = document.createElement('a');
         a.href = url;
         const timestamp = new Date().toISOString().split('T')[0];
-        const clientSafe = (analysisJson?.clientName || 'client').toString().replace(/\s+/g, '-');
+        const clientSafe = (analysisJson?.cliente || 'client').toString().replace(/\s+/g, '-');
         a.download = 'analysis-' + clientSafe + '-' + timestamp + '.json';
         document.body.appendChild(a);
         a.click();
@@ -602,8 +630,8 @@ export function generateDashboardHtml(result: AnalysisResult): string {
 
   logger.info({ 
     htmlLength: html.length,
-    clientName: result.clientName,
-    capabilityAreasCount: result.capabilityAreas.length,
+    cliente: result.cliente,
+    capacidadWAFCount: result.capacidadWAF.length,
     totalHours
   }, 'HTML dashboard generated successfully');
 
