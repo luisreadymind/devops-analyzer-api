@@ -7,6 +7,33 @@ const client = new OpenAIClient(
   new AzureKeyCredential(process.env.AZURE_OPENAI_API_KEY!)
 );
 
+const MAX_INPUT_TOKENS = 5000; // Token limit for input text
+const CHARS_PER_TOKEN = 4; // Approximate characters per token
+
+function truncateTextToTokenLimit(text: string, maxTokens: number): string {
+  const estimatedTokens = Math.ceil(text.length / CHARS_PER_TOKEN);
+  
+  if (estimatedTokens <= maxTokens) {
+    logger.info({ 
+      textLength: text.length, 
+      estimatedTokens 
+    }, 'Text within token limit');
+    return text;
+  }
+
+  const maxChars = maxTokens * CHARS_PER_TOKEN;
+  const truncatedText = text.substring(0, maxChars);
+  
+  logger.warn({ 
+    originalLength: text.length, 
+    originalEstimatedTokens: estimatedTokens,
+    truncatedLength: maxChars,
+    truncatedEstimatedTokens: maxTokens 
+  }, 'Text truncated to fit token limit');
+
+  return truncatedText + '\n\n[Texto truncado para ajustarse al límite de tokens. Análisis basado en las primeras secciones del documento.]';
+}
+
 const SYSTEM_PROMPT = `Eres un experto consultor en DevOps y transformación digital. Analiza el siguiente documento de evaluación DevOps y proporciona un análisis detallado.
 
 Debes responder ÚNICAMENTE con un objeto JSON válido siguiendo esta estructura:
@@ -39,21 +66,24 @@ export async function analyzePdfWithOpenAI(pdfText: string): Promise<AnalysisRes
     const deploymentName = process.env.AZURE_OPENAI_DEPLOYMENT || 'gpt-4o';
     const endpoint = process.env.AZURE_OPENAI_ENDPOINT;
     
+    // Truncate text if it exceeds token limit
+    const truncatedText = truncateTextToTokenLimit(pdfText, MAX_INPUT_TOKENS);
+    
     logger.info({ 
       deploymentName, 
       endpoint: endpoint?.substring(0, 40) + '...',
-      textLength: pdfText.length 
+      textLength: truncatedText.length 
     }, 'Sending request to Azure OpenAI');
 
     const response = await client.getChatCompletions(
       deploymentName,
       [
         { role: 'system', content: SYSTEM_PROMPT },
-        { role: 'user', content: `Analiza este documento de evaluación DevOps:\n\n${pdfText}` }
+        { role: 'user', content: `Analiza este documento de evaluación DevOps:\n\n${truncatedText}` }
       ],
       {
         temperature: 0.7,
-        maxTokens: 4000,
+        maxTokens: 5000,
         responseFormat: { type: 'json_object' }
       }
     );
