@@ -7,7 +7,7 @@ const client = new OpenAIClient(
   new AzureKeyCredential(process.env.AZURE_OPENAI_API_KEY!)
 );
 
-const MAX_INPUT_TOKENS = 5000; // Token limit for input text
+const MAX_INPUT_TOKENS = 50000; // Token limit for input text
 const CHARS_PER_TOKEN = 4; // Approximate characters per token
 
 function truncateTextToTokenLimit(text: string, maxTokens: number): string {
@@ -194,7 +194,7 @@ export async function analyzePdfWithOpenAI(pdfText: string): Promise<AnalysisRes
       ],
       {
         temperature: 0.7,
-        maxTokens: 5000,
+        maxTokens: 16000,
         responseFormat: { type: 'json_object' }
       }
     );
