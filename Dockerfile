@@ -7,7 +7,7 @@ WORKDIR /app
 COPY package.json ./
 
 # Install all dependencies (including devDependencies for building)
-RUN npm install --production=false
+RUN npm install
 
 # Copy source code
 COPY tsconfig.json ./
