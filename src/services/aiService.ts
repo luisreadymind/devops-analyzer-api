@@ -129,24 +129,26 @@ Debes responder ÚNICAMENTE con un objeto JSON válido siguiendo EXACTAMENTE est
     "horasMaximas": 400,
     "periodoMaximoMeses": 4,
     "horasSemanalesPorRecurso": 40,
+    "diasLaboralesPorSemana": 5,
+    "horasPorDia": 8,
     "resumenRoles": [
       {
-        "rol": "Arquitecto DevOps",
+        "rol": "Arquitecto Cloud",
         "horas": <total de horas asignadas>,
         "porcentaje": <porcentaje del total>
       },
       {
-        "rol": "Ingeniero DevOps",
+        "rol": "DevOps Engineer",
         "horas": <total de horas asignadas>,
         "porcentaje": <porcentaje del total>
       },
       {
-        "rol": "Ingeniero Seguridad Cloud",
+        "rol": "QA Engineer",
         "horas": <total de horas asignadas>,
         "porcentaje": <porcentaje del total>
       },
       {
-        "rol": "Scrum Master",
+        "rol": "PM",
         "horas": <total de horas asignadas>,
         "porcentaje": <porcentaje del total>
       }
@@ -154,12 +156,13 @@ Debes responder ÚNICAMENTE con un objeto JSON válido siguiendo EXACTAMENTE est
     "tareasDetalladas": [
       {
         "id_tarea": "T1",
-        "descripcion": "Descripción de la tarea",
+        "descripcion": "Descripción detallada de la tarea alineada con las recomendaciones",
         "horas_estimadas": <número>,
         "dependencia": "ID de tarea previa o string vacío",
-        "rol": "Arquitecto DevOps|Ingeniero DevOps|Ingeniero Seguridad Cloud|Scrum Master",
+        "rol": "Arquitecto Cloud|DevOps Engineer|QA Engineer|PM",
         "fase": "MES_1|MES_2|MES_3|MES_4",
-        "prioridad": "ALTA|MEDIA|BAJA"
+        "prioridad": "ALTA|MEDIA|BAJA",
+        "recomendacion_id": <número de recomendación relacionada>
       }
     ]
   },
@@ -243,11 +246,22 @@ REGLAS CRÍTICAS:
 3. **Plan de Trabajo**: 
    - Total de horas DEBE ser <= 400
    - Periodo de 4 meses
-   - Distribuir entre 4 roles principales
-   - Mínimo 8-12 tareas detalladas
+   - Jornada laboral: LUNES A VIERNES (5 días/semana, 8 horas/día)
+   - Distribuir entre 4 roles OBLIGATORIOS:
+     * Arquitecto Cloud
+     * DevOps Engineer
+     * QA Engineer
+     * PM (Project Manager)
+   - Mínimo 15-20 tareas detalladas
+   - Las tareas deben estar alineadas con las recomendaciones
+   - Calcular horas basándose en las recomendaciones priorizadas
    - Usar dependencias lógicas (T1, T2, etc.)
 
-4. **Recomendaciones**: Generar 8-15 recomendaciones priorizadas con servicios Azure específicos
+4. **Recomendaciones**: 
+   - Generar MÍNIMO 10 recomendaciones (óptimo: 12-15)
+   - Priorizar según impacto y urgencia
+   - Cada recomendación debe especificar servicios Azure concretos
+   - Las recomendaciones deben fundamentar el plan de trabajo
 
 5. **Proyección y Roadmap**: 4 meses de evolución con incrementos graduales de madurez
 
