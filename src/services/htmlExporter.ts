@@ -1,21 +1,8 @@
 import { AnalysisResult } from '../schemas/analysisResult.js';
 import { logger } from '../config/logger.js';
 
-function escapeHtml(text: string): string {
-  const map: Record<string, string> = {
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#039;'
-  };
-  return text.replace(/[&<>"']/g, (m) => map[m]);
-}
-
-export function generateDashboardHtml(result: AnalysisResult, fileName: string): string {
+export function generateDashboardHtml(result: AnalysisResult): string {
   logger.info('Generating HTML dashboard from template');
-
-  const timestamp = new Date().toLocaleString('es-MX');
   
   // Map categories to dimensions
   const dimensionesData = result.categories.map(cat => ({
@@ -25,17 +12,6 @@ export function generateDashboardHtml(result: AnalysisResult, fileName: string):
     assessment: cat.findings.join(' '),
     recommendations: cat.recommendations.join(' ')
   }));
-
-  const promedio = result.overallScore;
-  const objetivo = Math.min(100, promedio + 30);
-  const incrementoPorMes = (objetivo - promedio) / 4;
-  const evolucion = [
-    promedio,
-    Math.round(promedio + incrementoPorMes),
-    Math.round(promedio + incrementoPorMes * 2),
-    Math.round(promedio + incrementoPorMes * 3),
-    objetivo
-  ];
 
   const recomendacionesData = result.actionItems.map((item, idx) => ({
     id: `T-${String(idx + 1).padStart(2, '0')}`,
