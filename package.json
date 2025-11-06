@@ -8,7 +8,8 @@
     "node": ">=20.0.0"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && npm run copy-assets",
+    "copy-assets": "node -e \"const fs=require('fs'),path=require('path');const src=path.join('src','services','report-template.css'),dest=path.join('dist','services','report-template.css');fs.mkdirSync(path.dirname(dest),{recursive:true});fs.copyFileSync(src,dest);\"",
     "start": "node dist/index.js",
     "dev": "tsx watch src/index.ts",
     "lint": "eslint src --ext .ts",
