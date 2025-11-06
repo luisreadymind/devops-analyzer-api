@@ -158,11 +158,21 @@ Debes responder ÚNICAMENTE con un objeto JSON válido siguiendo EXACTAMENTE est
         "id_tarea": "T1",
         "descripcion": "Descripción detallada de la tarea alineada con las recomendaciones",
         "horas_estimadas": <número>,
-        "dependencia": "ID de tarea previa o string vacío",
+        "dependencia": "",
         "rol": "Arquitecto Cloud|DevOps Engineer|QA Engineer|PM",
         "fase": "MES_1|MES_2|MES_3|MES_4",
         "prioridad": "ALTA|MEDIA|BAJA",
-        "recomendacion_id": <número ID de recomendación (1-15)>
+        "recomendacion_id": 1
+      },
+      {
+        "id_tarea": "T2",
+        "descripcion": "Otra tarea detallada",
+        "horas_estimadas": <número>,
+        "dependencia": "T1",
+        "rol": "DevOps Engineer",
+        "fase": "MES_1",
+        "prioridad": "ALTA",
+        "recomendacion_id": 2
       }
     ]
   },
