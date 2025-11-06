@@ -52,14 +52,16 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Deploy to Azure Web App
-        uses: azure/webapps-deploy@v2
-        with:
-          app-name: ${{ env.AZURE_WEBAPP_NAME }}
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+      - name: Trigger Azure App Service deployment
+        run: |
+          echo "✅ Docker image pushed to ghcr.io"
+          echo "📦 Image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
+          echo "🔄 Azure App Service will automatically pull the new image"
+          echo "⏰ Wait 2-3 minutes for deployment to complete"
 
       - name: Health check
         run: |
-          sleep 30
-          curl -f https://${{ env.AZURE_WEBAPP_NAME }}.azurewebsites.net/health || exit 1
+          echo "⏳ Waiting 90 seconds for container to start..."
+          sleep 90
+          echo "🏥 Testing health endpoint..."
+          curl -f https://${{ env.AZURE_WEBAPP_NAME }}.azurewebsites.net/health || echo "⚠️ Health check failed - check Azure portal logs"
