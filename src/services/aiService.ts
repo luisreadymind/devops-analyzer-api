@@ -34,32 +34,133 @@ function truncateTextToTokenLimit(text: string, maxTokens: number): string {
   return truncatedText + '\n\n[Texto truncado para ajustarse al límite de tokens. Análisis basado en las primeras secciones del documento.]';
 }
 
-const SYSTEM_PROMPT = `Eres un experto consultor en DevOps y transformación digital. Analiza el siguiente documento de evaluación DevOps y proporciona un análisis detallado.
+const SYSTEM_PROMPT = `Eres un experto consultor en DevOps y transformación digital con especialización en Microsoft Azure. Analiza el siguiente documento de evaluación DevOps y proporciona un análisis detallado siguiendo los estándares CMMI.
 
-Debes responder ÚNICAMENTE con un objeto JSON válido siguiendo esta estructura:
+Debes responder ÚNICAMENTE con un objeto JSON válido siguiendo EXACTAMENTE esta estructura:
+
 {
-  "overallScore": <número entre 0-100>,
-  "summary": "<resumen ejecutivo de 2-3 párrafos>",
-  "categories": [
+  "clientName": "Nombre de la organización extraído del documento (si no se encuentra, usa 'Cliente_Confidencial')",
+  "executiveSummary": "Resumen ejecutivo conciso de las fortalezas y debilidades críticas",
+  "overallScore": 0-100,
+  "potentialScore": 0-100,
+  "cmmiLevelsExplanation": [
     {
-      "name": "<nombre de la categoría>",
-      "score": <número entre 0-100>,
-      "findings": ["<hallazgo 1>", "<hallazgo 2>"],
-      "recommendations": ["<recomendación 1>", "<recomendación 2>"]
+      "level": "INICIAL",
+      "scoreRange": "0-30",
+      "description": "Procesos ad-hoc, impredecibles y reactivos"
+    },
+    {
+      "level": "GESTIONADO",
+      "scoreRange": "31-60",
+      "description": "Procesos planificados, documentados y gestionados a nivel de proyecto"
+    },
+    {
+      "level": "DEFINIDO",
+      "scoreRange": "61-85",
+      "description": "Procesos estandarizados, documentados y consistentes a nivel organizacional"
+    },
+    {
+      "level": "OPTIMIZADO",
+      "scoreRange": "86-100",
+      "description": "Mejora continua basada en métricas y datos"
     }
   ],
-  "strengths": ["<fortaleza 1>", "<fortaleza 2>"],
-  "weaknesses": ["<debilidad 1>", "<debilidad 2>"],
-  "actionItems": [
+  "capabilityAreas": [
     {
-      "priority": "High|Medium|Low",
-      "description": "<descripción>",
-      "estimatedEffort": "<esfuerzo estimado>"
+      "area": "Gestión Ágil de Proyectos",
+      "score": 0-100,
+      "level": "INICIAL|GESTIONADO|DEFINIDO|OPTIMIZADO",
+      "assessment": "Evaluación detallada",
+      "recommendations": "Recomendaciones específicas"
+    },
+    {
+      "area": "Control de Versiones",
+      "score": 0-100,
+      "level": "INICIAL|GESTIONADO|DEFINIDO|OPTIMIZADO",
+      "assessment": "Evaluación detallada",
+      "recommendations": "Recomendaciones específicas"
+    },
+    {
+      "area": "CI/CD",
+      "score": 0-100,
+      "level": "INICIAL|GESTIONADO|DEFINIDO|OPTIMIZADO",
+      "assessment": "Evaluación detallada",
+      "recommendations": "Recomendaciones específicas"
+    },
+    {
+      "area": "Infraestructura como Código",
+      "score": 0-100,
+      "level": "INICIAL|GESTIONADO|DEFINIDO|OPTIMIZADO",
+      "assessment": "Evaluación detallada",
+      "recommendations": "Recomendaciones específicas"
+    },
+    {
+      "area": "Seguridad",
+      "score": 0-100,
+      "level": "INICIAL|GESTIONADO|DEFINIDO|OPTIMIZADO",
+      "assessment": "Evaluación detallada",
+      "recommendations": "Recomendaciones específicas"
+    },
+    {
+      "area": "Gestión de Configuración",
+      "score": 0-100,
+      "level": "INICIAL|GESTIONADO|DEFINIDO|OPTIMIZADO",
+      "assessment": "Evaluación detallada",
+      "recommendations": "Recomendaciones específicas"
+    },
+    {
+      "area": "Monitoreo y Observabilidad",
+      "score": 0-100,
+      "level": "INICIAL|GESTIONADO|DEFINIDO|OPTIMIZADO",
+      "assessment": "Evaluación detallada",
+      "recommendations": "Recomendaciones específicas"
+    },
+    {
+      "area": "Cultura DevOps",
+      "score": 0-100,
+      "level": "INICIAL|GESTIONADO|DEFINIDO|OPTIMIZADO",
+      "assessment": "Evaluación detallada",
+      "recommendations": "Recomendaciones específicas"
     }
-  ]
+  ],
+  "azureServiceRecommendations": [
+    {
+      "service": "Nombre del servicio Azure",
+      "summary": "Descripción breve",
+      "vnetIntegration": "Sí/No - detalles",
+      "pricing": "Información de precios",
+      "url": "URL de documentación"
+    }
+  ],
+  "workPlan": [
+    {
+      "id": "T-01",
+      "task": "Descripción de la tarea",
+      "hours": <número>,
+      "dependency": "ID de tarea previa o vacío",
+      "role": "Arquitecto Cloud|Ingeniero DevOps|Ingeniero QA|PM"
+    }
+  ],
+  "azureArchitecture": {
+    "title": "Título de la arquitectura",
+    "description": "Descripción detallada",
+    "diagram": "Diagrama en sintaxis Mermaid.js con componentes Azure",
+    "services": [
+      {
+        "name": "Nombre del servicio",
+        "role": "Función en la arquitectura"
+      }
+    ]
+  }
 }
 
-Analiza al menos 5 categorías principales de DevOps: CI/CD, Infrastructure as Code, Monitoring, Security, y Collaboration.`;
+REGLAS IMPORTANTES:
+1. El workPlan debe tener un TOTAL de horas ESTRICTAMENTE INFERIOR a 400
+2. Usa las 8 áreas de capacidad especificadas exactamente
+3. Asigna niveles CMMI según los rangos: INICIAL (0-30), GESTIONADO (31-60), DEFINIDO (61-85), OPTIMIZADO (86-100)
+4. El potentialScore debe ser realista (overallScore + mejora esperada)
+5. Recomienda SOLO servicios de Azure relevantes
+6. El diagrama Mermaid debe seguir la sintaxis correcta con componentes Azure`;
 
 export async function analyzePdfWithOpenAI(pdfText: string): Promise<AnalysisResult> {
   try {

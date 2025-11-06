@@ -4,33 +4,22 @@ import { logger } from '../config/logger.js';
 export function generateDashboardHtml(result: AnalysisResult): string {
   logger.info('Generating HTML dashboard from template');
   
-  // Map categories to dimensions
-  const dimensionesData = result.categories.map(cat => ({
-    nombre: cat.name,
-    valor: cat.score,
-    nivel: cat.score >= 86 ? 'OPTIMIZADO' : cat.score >= 61 ? 'DEFINIDO' : cat.score >= 31 ? 'GESTIONADO' : 'INICIAL',
-    assessment: cat.findings.join(' '),
-    recommendations: cat.recommendations.join(' ')
-  }));
+  // Map capability areas to dimensions (already in correct format)
+  const dimensionesData = result.capabilityAreas;
 
-  const recomendacionesData = result.actionItems.map((item, idx) => ({
-    id: `T-${String(idx + 1).padStart(2, '0')}`,
-    recomendacion: item.description,
-    prioridad: item.priority === 'High' ? 'Alta' : item.priority === 'Medium' ? 'Media' : 'Baja',
-    servicio: 'Azure DevOps / Azure',
-    esfuerzo_h: item.estimatedEffort === 'Alto' ? 40 : item.estimatedEffort === 'Medio' ? 24 : 16,
-    dependencia: '',
-    role: item.priority === 'High' ? 'Arquitecto Cloud' : 'Ingeniero DevOps'
-  }));
+  // Map work plan to recommendations table
+  const recomendacionesData = result.workPlan;
 
   const htmlLength = 0;
   logger.info({ 
     htmlLength,
-    categoriesCount: result.categories.length,
+    clientName: result.clientName,
+    capabilityAreasCount: result.capabilityAreas.length,
     dimensionesCount: dimensionesData.length,
-    recomendacionesCount: recomendacionesData.length
+    recomendacionesCount: recomendacionesData.length,
+    totalHours: recomendacionesData.reduce((sum, item) => sum + item.hours, 0)
   }, 'HTML dashboard generation started');
 
   // Return simple HTML for now - will be replaced with full template
-  return `<!DOCTYPE html><html><head><title>Test</title></head><body><h1>DevOps Dashboard</h1></body></html>`;
+  return `<!DOCTYPE html><html><head><title>DevOps Assessment - ${result.clientName}</title></head><body><h1>DevOps Dashboard - ${result.clientName}</h1><p>${result.executiveSummary}</p></body></html>`;
 }
