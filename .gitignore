@@ -40,3 +40,4 @@ uploads/
 
 # Azure
 .azure/
+publish-profile.xml
