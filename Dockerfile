@@ -21,6 +21,15 @@ FROM node:20-alpine
 
 WORKDIR /app
 
+# Install dependencies for pdf-parse (canvas-related libraries)
+RUN apk add --no-cache \
+    cairo \
+    pango \
+    giflib \
+    pixman \
+    libjpeg-turbo \
+    libpng
+
 # Copy package files
 COPY package.json ./
 
