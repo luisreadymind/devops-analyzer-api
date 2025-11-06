@@ -193,6 +193,7 @@ export function generateDashboardHtml(result: AnalysisResult): string {
         <div class="d-flex align-items-center gap-2">
           <span class="badge-env">Producción</span>
           <button class="btn-export" onclick="exportHTML()"><i class="bi bi-download"></i> Exportar HTML</button>
+          <button class="btn-export" style="background: #6c757d;" onclick="downloadJSON()"><i class="bi bi-file-earmark-code"></i> Descargar JSON</button>
         </div>
       </header>
 
@@ -335,11 +336,13 @@ export function generateDashboardHtml(result: AnalysisResult): string {
   </div>
 
   <script>
-    const dimensiones = ${escapeJson(dimensionesData)};
-    const promedio = ${promedio};
-    const objetivo = ${objetivo};
-    const evolucion = ${escapeJson(evolucion)};
-    const recomendaciones = ${escapeJson(recomendacionesData)};
+  const dimensiones = ${escapeJson(dimensionesData)};
+  const promedio = ${promedio};
+  const objetivo = ${objetivo};
+  const evolucion = ${escapeJson(evolucion)};
+  const recomendaciones = ${escapeJson(recomendacionesData)};
+  // Full AI analysis JSON (original response) - available for download
+  const analysisJson = ${escapeJson(result)};
 
     document.addEventListener("DOMContentLoaded", function() {
       document.getElementById("now").innerText = new Date().toLocaleString("es-ES", { dateStyle: "full", timeStyle: "short" });
@@ -495,6 +498,24 @@ export function generateDashboardHtml(result: AnalysisResult): string {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
+    }
+    
+    function downloadJSON() {
+      try {
+        const jsonString = JSON.stringify(analysisJson, null, 2);
+        const blob = new Blob([jsonString], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        const clientSafe = (analysisJson?.clientName || 'client').toString().replace(/\s+/g, '-');
+  a.download = 'analysis-' + clientSafe + '.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      } catch (e) {
+        console.error('Failed to download JSON', e);
+      }
     }
   </script>
 </body>
