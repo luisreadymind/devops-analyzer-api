@@ -15,7 +15,7 @@ const upload = multer({
   limits: {
     fileSize: (parseInt(process.env.MAX_FILE_SIZE_MB || '20') * 1024 * 1024) // Default 20MB
   },
-  fileFilter: (req, file, cb) => {
+  fileFilter: (_req, file, cb) => {
     if (file.mimetype === 'application/pdf') {
       cb(null, true);
     } else {

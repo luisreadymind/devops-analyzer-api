@@ -1,12 +1,11 @@
-import { AzureOpenAI } from '@azure/openai';
+import { OpenAIClient, AzureKeyCredential } from '@azure/openai';
 import { logger } from '../config/logger.js';
 import { AnalysisResult, AnalysisResultSchema } from '../schemas/analysisResult.js';
 
-const client = new AzureOpenAI({
-  endpoint: process.env.AZURE_OPENAI_ENDPOINT!,
-  apiKey: process.env.AZURE_OPENAI_API_KEY!,
-  apiVersion: '2024-02-01'
-});
+const client = new OpenAIClient(
+  process.env.AZURE_OPENAI_ENDPOINT!,
+  new AzureKeyCredential(process.env.AZURE_OPENAI_API_KEY!)
+);
 
 const SYSTEM_PROMPT = `Eres un experto consultor en DevOps y transformación digital. Analiza el siguiente documento de evaluación DevOps y proporciona un análisis detallado.
 
@@ -39,16 +38,20 @@ export async function analyzePdfWithOpenAI(pdfText: string): Promise<AnalysisRes
   try {
     logger.info('Sending request to Azure OpenAI');
 
-    const response = await client.chat.completions.create({
-      model: process.env.AZURE_OPENAI_DEPLOYMENT || 'gpt-4',
-      messages: [
+    const deploymentName = process.env.AZURE_OPENAI_DEPLOYMENT || 'gpt-4o';
+    
+    const response = await client.getChatCompletions(
+      deploymentName,
+      [
         { role: 'system', content: SYSTEM_PROMPT },
         { role: 'user', content: `Analiza este documento de evaluación DevOps:\n\n${pdfText}` }
       ],
-      temperature: 0.7,
-      max_tokens: 4000,
-      response_format: { type: 'json_object' }
-    });
+      {
+        temperature: 0.7,
+        maxTokens: 4000,
+        responseFormat: { type: 'json_object' }
+      }
+    );
 
     const content = response.choices[0]?.message?.content;
     if (!content) {
