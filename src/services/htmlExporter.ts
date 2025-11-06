@@ -143,8 +143,82 @@ export function generateDashboardHtml(result: AnalysisResult): string {
   // Generate Roadmap section
   const roadmapHtml = `
         <div class="mt-3 d-none" id="section-roadmap">
+          <!-- Tabla de Plan de Trabajo Detallado -->
+          <div class="panel mb-3">
+            <div class="panel-title"><span>Plan de Trabajo Detallado (${result.planTrabajo.horasMaximas}h ≈ ${result.planTrabajo.periodoMaximoMeses} meses)</span></div>
+            <div class="table-responsive">
+              <table class="table table-sm table-hover align-middle mb-0" style="font-size: 0.85rem;">
+                <thead class="table-light">
+                  <tr>
+                    <th scope="col" style="width: 8%;">ID Tarea</th>
+                    <th scope="col" style="width: 35%;">Descripción</th>
+                    <th scope="col" style="width: 12%;">Horas Estimadas</th>
+                    <th scope="col" style="width: 18%;">Rol</th>
+                    <th scope="col" style="width: 12%;">Fase</th>
+                    <th scope="col" style="width: 15%;">Dependencia</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${result.planTrabajo.tareasDetalladas.map(tarea => {
+                    const prioridadColor = tarea.prioridad === 'ALTA' ? '#D13438' : 
+                                          tarea.prioridad === 'MEDIA' ? '#FF8C00' : '#107C10';
+                    return `
+                    <tr>
+                      <td><span class="badge" style="background-color: ${prioridadColor};">${escapeHtml(tarea.id_tarea)}</span></td>
+                      <td>${escapeHtml(tarea.descripcion)}</td>
+                      <td class="text-center"><strong>${tarea.horas_estimadas}h</strong></td>
+                      <td>${escapeHtml(tarea.rol)}</td>
+                      <td><span class="badge bg-secondary">${escapeHtml(tarea.fase)}</span></td>
+                      <td class="text-center">${tarea.dependencia ? escapeHtml(tarea.dependencia) : '-'}</td>
+                    </tr>`;
+                  }).join('')}
+                </tbody>
+                <tfoot class="table-light">
+                  <tr>
+                    <td colspan="2" class="text-end"><strong>TOTAL HORAS:</strong></td>
+                    <td class="text-center"><strong>${result.planTrabajo.tareasDetalladas.reduce((sum, t) => sum + t.horas_estimadas, 0)}h</strong></td>
+                    <td colspan="3"></td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+
+          <!-- Gráfico de Distribución de Horas por Rol -->
+          <div class="panel mb-3">
+            <div class="panel-title"><span>Distribución de Horas por Rol</span></div>
+            <div class="row">
+              <div class="col-md-6">
+                <canvas id="horasPorRolChart" style="max-height: 300px;"></canvas>
+              </div>
+              <div class="col-md-6">
+                <div class="table-responsive">
+                  <table class="table table-sm mb-0" style="font-size: 0.85rem;">
+                    <thead class="table-light">
+                      <tr>
+                        <th>Rol</th>
+                        <th class="text-end">Horas</th>
+                        <th class="text-end">Porcentaje</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${result.planTrabajo.resumenRoles.map(rol => `
+                        <tr>
+                          <td>${escapeHtml(rol.rol)}</td>
+                          <td class="text-end"><strong>${rol.horas}h</strong></td>
+                          <td class="text-end">${rol.porcentaje.toFixed(2)}%</td>
+                        </tr>
+                      `).join('')}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Roadmap de Implementación -->
           <div class="panel">
-            <div class="panel-title"><span>Roadmap de Implementación (${result.planTrabajo.horasMaximas}h ≈ ${result.planTrabajo.periodoMaximoMeses} meses)</span></div>
+            <div class="panel-title"><span>Roadmap de Implementación por Mes</span></div>
             ${result.roadmap.map(rm => `
               <div class="mb-3 p-3" style="background: #E6F3FF; border-left: 4px solid #0078D4; border-radius: 4px;">
                 <h6 class="small-text" style="font-weight: bold;">Mes ${rm.mes}</h6>
@@ -497,6 +571,59 @@ export function generateDashboardHtml(result: AnalysisResult): string {
           scales: { y: { max: 100, beginAtZero: true } } 
         }
       });
+
+      // Pie Chart - Distribución de Horas por Rol
+      const pieCtx = document.getElementById("horasPorRolChart");
+      if (pieCtx) {
+        new Chart(pieCtx, {
+          type: "pie",
+          data: {
+            labels: ${JSON.stringify(result.planTrabajo.resumenRoles.map(r => r.rol))},
+            datasets: [{
+              data: ${JSON.stringify(result.planTrabajo.resumenRoles.map(r => r.horas))},
+              backgroundColor: [
+                'rgba(0, 120, 212, 0.8)',    // Azul - Arquitecto Cloud
+                'rgba(16, 124, 16, 0.8)',     // Verde - DevOps Engineer
+                'rgba(255, 140, 0, 0.8)',     // Naranja - QA Engineer
+                'rgba(142, 76, 198, 0.8)'     // Morado - PM
+              ],
+              borderColor: [
+                'rgba(0, 120, 212, 1)',
+                'rgba(16, 124, 16, 1)',
+                'rgba(255, 140, 0, 1)',
+                'rgba(142, 76, 198, 1)'
+              ],
+              borderWidth: 2
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+              legend: {
+                position: 'bottom',
+                labels: {
+                  padding: 15,
+                  font: {
+                    size: 12
+                  }
+                }
+              },
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    const label = context.label || '';
+                    const value = context.parsed || 0;
+                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                    const percentage = ((value / total) * 100).toFixed(2);
+                    return label + ': ' + value + 'h (' + percentage + '%)';
+                  }
+                }
+              }
+            }
+          }
+        });
+      }
 
       // Tabulator Table
       new Tabulator("#rec-table", {
