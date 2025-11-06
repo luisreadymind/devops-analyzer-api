@@ -42,7 +42,7 @@ router.post('/generate-report', upload.single('file'), async (req: Request, res:
     const analysisResult = await analyzePdfWithOpenAI(pdfText);
 
     // Step 3: Generate HTML dashboard
-    const htmlContent = generateDashboardHtml(analysisResult, req.file.originalname);
+    const htmlContent = generateDashboardHtml(analysisResult);
 
     // Step 4: Upload to Azure Blob Storage
     const timestamp = Date.now();
