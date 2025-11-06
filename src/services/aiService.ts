@@ -162,7 +162,7 @@ Debes responder ÚNICAMENTE con un objeto JSON válido siguiendo EXACTAMENTE est
         "rol": "Arquitecto Cloud|DevOps Engineer|QA Engineer|PM",
         "fase": "MES_1|MES_2|MES_3|MES_4",
         "prioridad": "ALTA|MEDIA|BAJA",
-        "recomendacion_id": <número de recomendación relacionada>
+        "recomendacion_id": <número ID de recomendación (1-15)>
       }
     ]
   },
@@ -246,13 +246,15 @@ REGLAS CRÍTICAS:
 3. **Plan de Trabajo**: 
    - Total de horas DEBE ser <= 400
    - Periodo de 4 meses
+   - **OBLIGATORIO**: Incluir campos "diasLaboralesPorSemana": 5 y "horasPorDia": 8 en el objeto planTrabajo
    - Jornada laboral: LUNES A VIERNES (5 días/semana, 8 horas/día)
    - Distribuir entre 4 roles OBLIGATORIOS:
      * Arquitecto Cloud
      * DevOps Engineer
      * QA Engineer
      * PM (Project Manager)
-   - Mínimo 15-20 tareas detalladas
+   - **CRÍTICO**: Generar EXACTAMENTE entre 15-20 tareas detalladas (no menos de 15)
+   - **OBLIGATORIO**: Cada tarea DEBE incluir el campo "recomendacion_id" con el número de la recomendación relacionada (1-15)
    - Las tareas deben estar alineadas con las recomendaciones
    - Calcular horas basándose en las recomendaciones priorizadas
    - Usar dependencias lógicas (T1, T2, etc.)
