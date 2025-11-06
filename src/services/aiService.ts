@@ -36,7 +36,13 @@ function truncateTextToTokenLimit(text: string, maxTokens: number): string {
 
 const SYSTEM_PROMPT = `Eres un experto consultor senior en DevOps, transformación digital y arquitectura de Azure con certificación en Well-Architected Framework. Analiza el siguiente documento de evaluación DevOps y proporciona un análisis integral siguiendo los estándares CMMI y los pilares del Azure Well-Architected Framework.
 
-⚠️ IMPORTANTE: Debes responder ÚNICAMENTE con un objeto JSON válido siguiendo EXACTAMENTE esta estructura. NO OMITAS NINGÚN CAMPO. Los campos con valores literales (como diasLaboralesPorSemana: 5, diasLaborables: ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"], horasPorDia: 8) DEBEN incluirse tal cual en tu respuesta:
+📋 CONSIDERACIONES PARA EL PLAN DE TRABAJO:
+- Horario laboral: 9 AM a 6 PM (Hora México - UTC -6) = 8 horas por día
+- Semana laboral: Lunes a Viernes (5 días laborales)
+- Usa estas consideraciones para calcular las horas y duración del plan de trabajo
+- Total de horas: flexible hasta 450 horas máximo según complejidad y madurez de la empresa
+
+⚠️ IMPORTANTE: Debes responder ÚNICAMENTE con un objeto JSON válido siguiendo EXACTAMENTE esta estructura:
 
 {
   "cliente": "Nombre del cliente extraído del documento (si no aparece, usa 'Cliente Genérico')",
@@ -129,9 +135,6 @@ const SYSTEM_PROMPT = `Eres un experto consultor senior en DevOps, transformaci�
     "horasMaximas": 450,
     "periodoMaximoMeses": 4,
     "horasSemanalesPorRecurso": 40,
-    "diasLaboralesPorSemana": 5,
-    "diasLaborables": ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"],
-    "horasPorDia": 8,
     "resumenRoles": [
       {
         "rol": "Arquitecto Cloud",
@@ -255,9 +258,9 @@ REGLAS CRÍTICAS:
 3. **Plan de Trabajo**: 
    - Total de horas flexible según complejidad y madurez: HASTA 450 horas máximo
    - Ajustar las horas según nivel de madurez de la empresa y complejidad de las recomendaciones
+   - Considerar horario laboral: 9 AM a 6 PM (8 horas/día) - Hora México UTC -6
+   - Considerar semana laboral: Lunes a Viernes (5 días laborales)
    - Periodo de 4 meses
-   - **OBLIGATORIO**: Incluir campos "diasLaboralesPorSemana": 5, "diasLaborables": ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"] y "horasPorDia": 8 en el objeto planTrabajo
-   - Jornada laboral: LUNES A VIERNES (5 días/semana, 8 horas/día)
    - Distribuir entre 4 roles OBLIGATORIOS:
      * Arquitecto Cloud
      * DevOps Engineer
@@ -281,13 +284,11 @@ REGLAS CRÍTICAS:
 
 7. **Coherencia**: Los puntajes de capacidadWAF deben reflejar el nivel de madurezGlobal
 
-8. **VALIDACIÓN FINAL - NO OLVIDES ESTOS CAMPOS**:
-   - planTrabajo DEBE tener: "diasLaboralesPorSemana": 5
-   - planTrabajo DEBE tener: "diasLaborables": ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"]
-   - planTrabajo DEBE tener: "horasPorDia": 8
+8. **VALIDACIÓN FINAL**:
+   - planTrabajo NO debe incluir campos: diasLaboralesPorSemana, diasLaborables, horasPorDia
    - planTrabajo DEBE tener: "horasMaximas": <hasta 450 según complejidad>
    - Las tareas NO deben tener campo recomendacion_id
-   - Verifica estos campos antes de responder`;
+   - Verifica la estructura antes de responder`;
 
 export async function analyzePdfWithOpenAI(pdfText: string): Promise<AnalysisResult> {
   try {
