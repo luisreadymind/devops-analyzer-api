@@ -40,7 +40,10 @@ const SYSTEM_PROMPT = `Eres un experto consultor senior en DevOps, transformaci�
 - Horario laboral: 9 AM a 6 PM (Hora México - UTC -6) = 8 horas por día
 - Semana laboral: Lunes a Viernes (5 días laborales)
 - Usa estas consideraciones para calcular las horas y duración del plan de trabajo
-- Total de horas: flexible hasta 450 horas máximo según complejidad y madurez de la empresa
+- **Total de horas: MÁXIMO 400 horas** (debe ser menor a 450 horas obligatoriamente)
+- **Tareas: EXACTAMENTE 10 tareas** (ni más ni menos)
+- **Cada tarea DEBE incluir en su descripción el servicio de Azure recomendado para ejecutarla**
+- **Priorizar servicios Azure con IA**: GitHub Copilot, GitHub Advanced Security, Azure OpenAI Service, Azure ML
 
 ⚠️ IMPORTANTE: Debes responder ÚNICAMENTE con un objeto JSON válido siguiendo EXACTAMENTE esta estructura:
 
@@ -132,7 +135,7 @@ const SYSTEM_PROMPT = `Eres un experto consultor senior en DevOps, transformaci�
     }
   ],
   "planTrabajo": {
-    "horasMaximas": 450,
+    "horasMaximas": 400,
     "periodoMaximoMeses": 4,
     "horasSemanalesPorRecurso": 40,
     "resumenRoles": [
@@ -160,19 +163,19 @@ const SYSTEM_PROMPT = `Eres un experto consultor senior en DevOps, transformaci�
     "tareasDetalladas": [
       {
         "id_tarea": "T1",
-        "descripcion": "Descripción detallada de la tarea",
+        "descripcion": "Implementar escaneo de código en el pipeline mediante la integración de GitHub Advanced Security para detectar vulnerabilidades y secretos expuestos",
         "horas_estimadas": <número>,
         "dependencia": "",
-        "rol": "Arquitecto Cloud|DevOps Engineer|QA Engineer|PM",
-        "fase": "MES_1|MES_2|MES_3|MES_4",
-        "prioridad": "ALTA|MEDIA|BAJA"
+        "rol": "DevOps Engineer",
+        "fase": "MES_1",
+        "prioridad": "ALTA"
       },
       {
         "id_tarea": "T2",
-        "descripcion": "Otra tarea detallada",
+        "descripcion": "Configurar GitHub Copilot para el equipo de desarrollo para acelerar la escritura de código y mejorar la productividad mediante IA",
         "horas_estimadas": <número>,
         "dependencia": "T1",
-        "rol": "DevOps Engineer",
+        "rol": "Arquitecto Cloud",
         "fase": "MES_1",
         "prioridad": "ALTA"
       }
@@ -256,7 +259,7 @@ REGLAS CRÍTICAS:
 2. **Niveles CMMI**: INICIAL (0-30), GESTIONADO (31-60), DEFINIDO (61-85), OPTIMIZADO (86-100)
 
 3. **Plan de Trabajo**: 
-   - Total de horas flexible según complejidad y madurez: HASTA 450 horas máximo
+   - **Total de horas: MÁXIMO 400 horas** (menos de 450h obligatorio)
    - Ajustar las horas según nivel de madurez de la empresa y complejidad de las recomendaciones
    - Considerar horario laboral: 9 AM a 6 PM (8 horas/día) - Hora México UTC -6
    - Considerar semana laboral: Lunes a Viernes (5 días laborales)
@@ -266,9 +269,21 @@ REGLAS CRÍTICAS:
      * DevOps Engineer
      * QA Engineer
      * PM (Project Manager)
-   - **CRÍTICO**: Generar EXACTAMENTE entre 15-20 tareas detalladas (no menos de 15)
+   - **CRÍTICO**: Generar EXACTAMENTE 10 tareas detalladas (ni más ni menos)
    - Las tareas NO deben incluir campo recomendacion_id
-   - Las tareas deben ser específicas y accionables basadas en el análisis general
+   - **DESCRIPCIÓN DE TAREAS**: Cada tarea DEBE especificar el servicio de Azure recomendado para realizarla
+   - **FORMATO DE DESCRIPCIÓN**: "Acción a realizar mediante [Servicio Azure específico]. Ejemplo: Implementar escaneo de código en el pipeline mediante la integración de GitHub Advanced Security"
+   - **SERVICIOS AZURE PRIORITARIOS A PROMOVER**:
+     * GitHub Copilot (asistencia con IA en desarrollo)
+     * GitHub Advanced Security (escaneo de vulnerabilidades y secretos)
+     * Azure OpenAI Service (integración de IA en aplicaciones)
+     * Azure Machine Learning (MLOps y modelos de IA)
+     * Azure DevOps (pipelines CI/CD)
+     * Azure Monitor y Application Insights (observabilidad)
+     * Azure Key Vault (gestión de secretos)
+     * Azure Container Registry (gestión de imágenes)
+     * Azure Kubernetes Service (orquestación)
+   - Priorizar el uso de tecnologías emergentes en IA que se integren al ciclo de desarrollo
    - Calcular horas basándose en las recomendaciones priorizadas
    - Usar dependencias lógicas (T1, T2, etc.)
 
@@ -286,8 +301,11 @@ REGLAS CRÍTICAS:
 
 8. **VALIDACIÓN FINAL**:
    - planTrabajo NO debe incluir campos: diasLaboralesPorSemana, diasLaborables, horasPorDia
-   - planTrabajo DEBE tener: "horasMaximas": <hasta 450 según complejidad>
+   - planTrabajo DEBE tener: "horasMaximas": 400 (máximo permitido, menos de 450)
+   - Las tareas deben ser EXACTAMENTE 10 (no más, no menos)
    - Las tareas NO deben tener campo recomendacion_id
+   - CADA tarea DEBE mencionar el servicio de Azure recomendado en su descripción
+   - El total de horas de todas las tareas debe ser menor a 400 horas
    - Verifica la estructura antes de responder`;
 
 export async function analyzePdfWithOpenAI(pdfText: string): Promise<AnalysisResult> {
