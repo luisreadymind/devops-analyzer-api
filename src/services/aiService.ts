@@ -36,10 +36,15 @@ Analiza al menos 5 categorías principales de DevOps: CI/CD, Infrastructure as C
 
 export async function analyzePdfWithOpenAI(pdfText: string): Promise<AnalysisResult> {
   try {
-    logger.info('Sending request to Azure OpenAI');
-
     const deploymentName = process.env.AZURE_OPENAI_DEPLOYMENT || 'gpt-4o';
+    const endpoint = process.env.AZURE_OPENAI_ENDPOINT;
     
+    logger.info({ 
+      deploymentName, 
+      endpoint: endpoint?.substring(0, 40) + '...',
+      textLength: pdfText.length 
+    }, 'Sending request to Azure OpenAI');
+
     const response = await client.getChatCompletions(
       deploymentName,
       [
@@ -58,7 +63,7 @@ export async function analyzePdfWithOpenAI(pdfText: string): Promise<AnalysisRes
       throw new Error('Empty response from OpenAI');
     }
 
-    logger.info('Received response from Azure OpenAI');
+    logger.info({ responseLength: content.length }, 'Received response from Azure OpenAI');
     
     const parsedResult = JSON.parse(content);
     const validatedResult = AnalysisResultSchema.parse(parsedResult);
@@ -66,7 +71,26 @@ export async function analyzePdfWithOpenAI(pdfText: string): Promise<AnalysisRes
     logger.info({ overallScore: validatedResult.overallScore }, 'Analysis completed successfully');
     return validatedResult;
   } catch (error) {
-    logger.error({ error }, 'Failed to analyze PDF with OpenAI');
-    throw new Error('Failed to analyze document with AI. Please try again.');
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorDetails = error instanceof Error ? {
+      message: error.message,
+      name: error.name,
+      stack: error.stack,
+      // @ts-ignore - capture any additional properties
+      code: (error as any).code,
+      // @ts-ignore
+      statusCode: (error as any).statusCode,
+      // @ts-ignore
+      response: (error as any).response
+    } : error;
+    
+    logger.error({ 
+      error: errorDetails,
+      deployment: process.env.AZURE_OPENAI_DEPLOYMENT,
+      hasEndpoint: !!process.env.AZURE_OPENAI_ENDPOINT,
+      hasApiKey: !!process.env.AZURE_OPENAI_API_KEY
+    }, 'Failed to analyze PDF with OpenAI');
+    
+    throw new Error(`Failed to analyze document with AI: ${errorMessage}`);
   }
 }
