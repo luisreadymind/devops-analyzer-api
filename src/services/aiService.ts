@@ -36,6 +36,8 @@ function truncateTextToTokenLimit(text: string, maxTokens: number): string {
 
 const SYSTEM_PROMPT = `Eres un experto consultor senior en DevOps, transformación digital y arquitectura de Azure con certificación en Well-Architected Framework. Analiza el siguiente documento de evaluación DevOps y proporciona un análisis integral siguiendo los estándares CMMI y los pilares del Azure Well-Architected Framework.
 
+⚠️ MODO DETERMINISTA: Debes proporcionar resultados consistentes y reproducibles para el mismo documento de entrada. Usa criterios objetivos y evita variaciones arbitrarias en los puntajes, recomendaciones y observaciones.
+
 📋 CONSIDERACIONES PARA EL PLAN DE TRABAJO:
 - Horario laboral: 9 AM a 6 PM (Hora México - UTC -6) = 8 horas por día
 - Semana laboral: Lunes a Viernes (5 días laborales)
@@ -346,7 +348,7 @@ export async function analyzePdfWithOpenAI(pdfText: string): Promise<AnalysisRes
         { role: 'user', content: `Analiza este documento de evaluación DevOps:\n\n${truncatedText}` }
       ],
       {
-        temperature: 0.7,
+        temperature: 0.0,  // Temperatura 0 para resultados deterministas (sin variación)
         maxTokens: 16000,
         responseFormat: { type: 'json_object' }
       }

@@ -199,6 +199,9 @@ body {
 .kpi-sub {
   font-size: 12px;
   color: var(--text-secondary);
+  line-height: 1.4;
+  white-space: normal;
+  word-wrap: break-word;
 }
 
 .grid-2 {

@@ -325,12 +325,12 @@ export function generateDashboardHtml(result: AnalysisResult): string {
           <div class="kpi">
             <div class="kpi-label"><i class="bi bi-exclamation-triangle"></i> Áreas Críticas</div>
             <div class="kpi-value" style="font-size: 32px;">${result.resultadoGlobal.areasCriticas.length}</div>
-            <div class="kpi-sub">${escapeHtml(result.resultadoGlobal.areasCriticas[0] || 'N/A')}</div>
+            <div class="kpi-sub">${result.resultadoGlobal.areasCriticas.length > 0 ? result.resultadoGlobal.areasCriticas.map(area => escapeHtml(area)).join(', ') : 'N/A'}</div>
           </div>
           <div class="kpi">
             <div class="kpi-label"><i class="bi bi-check-circle"></i> Áreas Fuertes</div>
             <div class="kpi-value" style="font-size: 32px;">${result.resultadoGlobal.areasFuertes.length}</div>
-            <div class="kpi-sub">${escapeHtml(result.resultadoGlobal.areasFuertes[0] || 'N/A')}</div>
+            <div class="kpi-sub">${result.resultadoGlobal.areasFuertes.length > 0 ? result.resultadoGlobal.areasFuertes.map(area => escapeHtml(area)).join(', ') : 'N/A'}</div>
           </div>
         </div>
 
