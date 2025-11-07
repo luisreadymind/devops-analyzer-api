@@ -79,49 +79,49 @@ const SYSTEM_PROMPT = `Eres un experto consultor senior en DevOps, transformaci�
       "pilar": "Excelencia Operacional",
       "puntaje": <1-5>,
       "nivelCMMI": "INICIAL|GESTIONADO|DEFINIDO|OPTIMIZADO",
-      "observaciones": "Evaluación específica del pilar de Excelencia Operacional: automatización, procedimientos de recuperación, pruebas de resiliencia."
+      "observaciones": "Evaluación detallada (mínimo 200 caracteres) del estado actual: nivel de automatización, procedimientos de recuperación, pruebas de resiliencia, monitoreo proactivo. DEBE incluir recomendaciones específicas de servicios Azure: Azure Monitor para observabilidad, Application Insights para telemetría, Azure Automation para runbooks, Azure Log Analytics para centralización de logs, Azure DevOps para pipelines CI/CD automatizados. Especificar gaps identificados y cómo cada servicio Azure resolvería las deficiencias detectadas."
     },
     {
       "pilar": "Seguridad",
       "puntaje": <1-5>,
       "nivelCMMI": "INICIAL|GESTIONADO|DEFINIDO|OPTIMIZADO",
-      "observaciones": "Evaluación de seguridad: gestión de secretos, modelado de amenazas, cumplimiento normativo, controles proactivos."
+      "observaciones": "Evaluación detallada (mínimo 200 caracteres) de seguridad: gestión de secretos, modelado de amenazas, cumplimiento normativo, controles proactivos, vulnerabilidades identificadas. DEBE incluir servicios Azure específicos: Azure Key Vault para gestión de secretos y certificados, GitHub Advanced Security para escaneo de código y dependencias, Microsoft Defender for Cloud para protección de cargas de trabajo, Azure Policy para cumplimiento automatizado, Microsoft Entra ID para gestión de identidades, Azure Private Link para conectividad segura. Detallar brechas de seguridad y soluciones Azure puntuales."
     },
     {
       "pilar": "Confiabilidad",
       "puntaje": <1-5>,
       "nivelCMMI": "INICIAL|GESTIONADO|DEFINIDO|OPTIMIZADO",
-      "observaciones": "Evaluación de confiabilidad: automatización de despliegues, cobertura de pruebas, gestión de versiones, capacidad de recuperación."
+      "observaciones": "Evaluación detallada (mínimo 200 caracteres) de confiabilidad: automatización de despliegues, cobertura de pruebas, gestión de versiones, capacidad de recuperación ante fallos, estrategias de backup. DEBE especificar servicios Azure: Azure DevOps para pipelines CI/CD resilientes, Azure Site Recovery para recuperación ante desastres, Azure Backup para protección de datos, Azure Traffic Manager para balanceo y failover, Azure Kubernetes Service (AKS) para orquestación con alta disponibilidad, Azure Front Door para distribución global. Identificar puntos únicos de falla y cómo Azure los mitigaría."
     },
     {
       "pilar": "Optimización de Costos",
       "puntaje": <1-5>,
       "nivelCMMI": "INICIAL|GESTIONADO|DEFINIDO|OPTIMIZADO",
-      "observaciones": "Evaluación de costos: análisis de consumo, prácticas de ahorro, uso eficiente de recursos."
+      "observaciones": "Evaluación detallada (mínimo 200 caracteres) de optimización: análisis de consumo actual, prácticas de ahorro, uso eficiente de recursos, desperdicio identificado. DEBE incluir herramientas Azure específicas: Azure Cost Management + Billing para análisis de gastos, Azure Advisor para recomendaciones de ahorro, Azure Reserved Instances y Savings Plans para compromisos, Azure Policy para límites de gasto, Azure Automation para apagado programado de recursos no productivos, Azure Monitor para identificar recursos subutilizados. Cuantificar potencial de ahorro con cada servicio."
     },
     {
       "pilar": "Gobernanza",
       "puntaje": <1-5>,
       "nivelCMMI": "INICIAL|GESTIONADO|DEFINIDO|OPTIMIZADO",
-      "observaciones": "Evaluación de gobernanza: políticas, controles automáticos, cumplimiento, directrices estandarizadas."
+      "observaciones": "Evaluación detallada (mínimo 200 caracteres) de gobernanza: políticas implementadas, controles automáticos, cumplimiento normativo, directrices estandarizadas, auditoría. DEBE especificar servicios Azure: Azure Policy para aplicación automática de políticas, Azure Blueprints para plantillas de gobernanza, Microsoft Purview para gobierno de datos, Azure Resource Manager (ARM) templates y Bicep para infraestructura como código (IaC), Azure Management Groups para jerarquía organizacional, Azure RBAC para control de accesos granular. Identificar gaps de cumplimiento y controles Azure necesarios."
     },
     {
       "pilar": "Desempeño y Eficiencia",
       "puntaje": <1-5>,
       "nivelCMMI": "INICIAL|GESTIONADO|DEFINIDO|OPTIMIZADO",
-      "observaciones": "Evaluación de desempeño: prácticas CI/CD, pruebas de performance, nivel de automatización."
+      "observaciones": "Evaluación detallada (mínimo 200 caracteres) de desempeño: prácticas CI/CD actuales, pruebas de performance, nivel de automatización, métricas de velocidad (lead time, deployment frequency). DEBE incluir servicios Azure: Azure DevOps o GitHub Actions para pipelines optimizados, Azure Load Testing para pruebas de carga, Application Insights para APM (Application Performance Monitoring), Azure Cache for Redis para optimización de latencia, Azure CDN para distribución de contenido, GitHub Copilot para acelerar desarrollo. Medir y comparar con benchmarks DORA metrics."
     },
     {
       "pilar": "Cultura y Colaboración",
       "puntaje": <1-5>,
       "nivelCMMI": "INICIAL|GESTIONADO|DEFINIDO|OPTIMIZADO",
-      "observaciones": "Evaluación cultural: adopción ágil, colaboración entre equipos, resistencia al cambio, indicadores culturales."
+      "observaciones": "Evaluación detallada (mínimo 200 caracteres) cultural: adopción de metodologías ágiles, colaboración entre equipos (Dev/Ops/QA), resistencia al cambio, silos organizacionales, indicadores de cultura DevOps. DEBE recomendar servicios Azure para colaboración: Azure DevOps Boards para gestión ágil de trabajo, GitHub para colaboración en código con pull requests, Azure DevOps Wiki para documentación compartida, Microsoft Teams integrado con DevOps para comunicación, GitHub Copilot para democratizar conocimiento técnico. Identificar barreras culturales y cómo las herramientas Azure facilitan la transformación."
     },
     {
       "pilar": "Sostenibilidad",
       "puntaje": <1-5>,
       "nivelCMMI": "INICIAL|GESTIONADO|DEFINIDO|OPTIMIZADO",
-      "observaciones": "Evaluación de sostenibilidad: gestión de artefactos, dependencias, iniciativas escalables."
+      "observaciones": "Evaluación detallada (mínimo 200 caracteres) de sostenibilidad: gestión de artefactos, control de dependencias, deuda técnica, escalabilidad de soluciones, impacto ambiental. DEBE especificar servicios Azure: Azure Container Registry para gestión centralizada de imágenes, Azure Artifacts para paquetes y dependencias, GitHub Dependabot para actualización automática de dependencias, Azure Kubernetes Service (AKS) para escalabilidad eficiente, Microsoft Sustainability Calculator para huella de carbono, Azure Advisor para recomendaciones de eficiencia energética. Evaluar madurez de prácticas sostenibles y roadmap Azure para mejorarlas."
     }
   ],
   "recomendaciones": [
@@ -255,6 +255,14 @@ REGLAS CRÍTICAS:
    - Desempeño y Eficiencia
    - Cultura y Colaboración
    - Sostenibilidad
+   
+   **CRÍTICO - OBSERVACIONES DETALLADAS**: Cada observación debe tener MÍNIMO 200 caracteres y DEBE incluir:
+   - Estado actual específico del cliente (no genérico)
+   - Gaps y deficiencias identificadas
+   - Servicios Azure específicos recomendados (mínimo 3-5 por pilar)
+   - Explicación de CÓMO cada servicio Azure resuelve los problemas identificados
+   - Impacto esperado de implementar cada servicio
+   - Priorización de servicios según criticidad
 
 2. **Niveles CMMI**: INICIAL (0-30), GESTIONADO (31-60), DEFINIDO (61-85), OPTIMIZADO (86-100)
 
@@ -299,6 +307,14 @@ REGLAS CRÍTICAS:
 
 7. **Coherencia**: Los puntajes de capacidadWAF deben reflejar el nivel de madurezGlobal
 
+7.5. **OBSERVACIONES EN CAPACIDAD WAF - REQUISITOS OBLIGATORIOS**:
+   - Cada observación debe tener MÍNIMO 200 caracteres (idealmente 250-400)
+   - Debe mencionar MÍNIMO 3-5 servicios Azure específicos por pilar
+   - Debe explicar el GAP actual y CÓMO cada servicio Azure lo resolvería
+   - Debe ser contextual al cliente, no genérica
+   - Debe priorizar servicios según criticidad y quick wins
+   - Debe incluir ejemplos concretos de implementación cuando sea posible
+
 8. **VALIDACIÓN FINAL**:
    - planTrabajo NO debe incluir campos: diasLaboralesPorSemana, diasLaborables, horasPorDia
    - planTrabajo DEBE tener: "horasMaximas": 400 (máximo permitido, menos de 450)
@@ -306,6 +322,7 @@ REGLAS CRÍTICAS:
    - Las tareas NO deben tener campo recomendacion_id
    - CADA tarea DEBE mencionar el servicio de Azure recomendado en su descripción
    - El total de horas de todas las tareas debe ser menor a 400 horas
+   - CADA observación en capacidadWAF DEBE tener mínimo 200 caracteres y mencionar 3-5 servicios Azure
    - Verifica la estructura antes de responder`;
 
 export async function analyzePdfWithOpenAI(pdfText: string): Promise<AnalysisResult> {
