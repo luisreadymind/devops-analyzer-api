@@ -506,7 +506,7 @@ export class WordExporterService {
     // Promedio de madurez esperada por pilar (usando el último mes de proyección)
     const lastProjection = data.proyeccionEvolucion[data.proyeccionEvolucion.length - 1];
     const expected = labels.map(_ => lastProjection ? lastProjection.madurezEsperada : 0);
-    const config = {
+    const config: import('chart.js').ChartConfiguration<'radar', number[], string> = {
       type: 'radar',
       data: {
         labels,
@@ -537,7 +537,7 @@ export class WordExporterService {
     // Barras: resultado por calificación
     const labels = data.capacidadWAF.map(p => p.pilar);
     const scores = data.capacidadWAF.map(p => p.puntaje);
-    const config = {
+    const config: import('chart.js').ChartConfiguration<'bar', number[], string> = {
       type: 'bar',
       data: {
         labels,
@@ -561,7 +561,7 @@ export class WordExporterService {
     // Evolución esperada al aplicar recomendaciones
     const labels = data.proyeccionEvolucion.map(p => p.mes);
     const madurez = data.proyeccionEvolucion.map(p => p.madurezEsperada);
-    const config = {
+    const config: import('chart.js').ChartConfiguration<'line', number[], string> = {
       type: 'line',
       data: {
         labels,
@@ -588,7 +588,7 @@ export class WordExporterService {
     // Pie: total de horas por rol
     const roles = data.planTrabajo.resumenRoles.map(r => r.rol);
     const horas = data.planTrabajo.resumenRoles.map(r => r.horas);
-    const config = {
+    const config: import('chart.js').ChartConfiguration<'pie', number[], string> = {
       type: 'pie',
       data: {
         labels: roles,
