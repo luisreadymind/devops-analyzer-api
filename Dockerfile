@@ -21,20 +21,13 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Install dependencies for canvas (image libraries and build tools)
+# Install dependencies for canvas (Alpine Linux)
 RUN apk add --no-cache \
-  libcairo \
-  libcairo-dev \
-  pango \
+  cairo-dev \
   pango-dev \
-  giflib \
   giflib-dev \
-  pixman \
-  libjpeg-turbo \
   libjpeg-turbo-dev \
-  libpng \
   libpng-dev \
-  librsvg \
   librsvg-dev \
   build-base \
   python3
