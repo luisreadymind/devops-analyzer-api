@@ -137,12 +137,92 @@ devops-analyzer-api/
 
 ## ☁️ Azure Deployment
 
-### 1. Create Azure Resources
+### 🚀 Quick Deploy (Recomendado)
+
+Usa nuestro **script maestro interactivo** que incluye múltiples métodos de deploy:
+
+```bash
+# Script interactivo con menú de opciones
+./deploy-master.sh
+```
+
+**Opciones disponibles:**
+1. **Deploy Directo** - Build local + Docker push + Azure deploy (5-8 min)
+2. **Push + GitHub Actions** - Git push + Actions monitoring + Azure sync (8-12 min) 
+3. **Validación Solo** - Health checks y status endpoints (1-2 min)
+
+### ⚙️ Métodos de Deploy Individuales
+
+**1. Deploy Directo (Rápido)**:
+```bash
+# Configurar variables de entorno
+cp .env.deploy.example .env.deploy
+# Editar .env.deploy con tu GitHub token
+
+# Validación pre-deploy
+./pre-deploy-check.sh
+
+# Deploy completo
+source .env.deploy && ./deploy-analyzer-api.sh
+```
+
+**2. Push + GitHub Actions (Robusto)**:
+```bash
+# Asegúrate de tener GitHub CLI instalado y autenticado
+gh auth login
+
+# Push automático + monitoreo de Actions + sincronización Azure
+./github-push-deploy-validator.sh
+```
+
+### 🔧 Características de los Scripts de Deploy
+
+**`deploy-master.sh`** - Script principal interactivo:
+- ✅ Menú de selección de método de deploy
+- ✅ Validación de prerequisites automática
+- ✅ Status del proyecto en tiempo real
+- ✅ Opciones para todos los niveles de usuario
+
+**`deploy-analyzer-api.sh`** - Deploy directo (13KB):
+- ✅ **8 pasos automatizados** de validación y deploy
+- ✅ Compilación TypeScript con verificación de errores
+- ✅ Docker build y push a GitHub Container Registry
+- ✅ Deploy automático a Azure App Service  
+- ✅ Health checks y validación de endpoints críticos
+- ✅ Reporte detallado en JSON con métricas
+
+**`github-push-deploy-validator.sh`** - Push + Actions (18KB):
+- ✅ **Push automático** a GitHub con tags timestamped
+- ✅ **Monitoreo GitHub Actions** por 200 segundos
+- ✅ **Validación job completado** exitosamente
+- ✅ **Verificación container** Azure App Service
+- ✅ **Actualización automática** si la versión no coincide
+- ✅ **Reinicio App Service** y wait 60 segundos post-restart
+- ✅ **Validación completa** de health checks
+- ✅ **Reportes detallados** en JSON
+
+**`pre-deploy-check.sh`** - Validación previa (4KB):
+- ✅ 10 verificaciones críticas antes del deploy
+- ✅ Validación de configuración y conectividad  
+- ✅ Prevención de errores comunes
+
+### 📊 Repository Configuration
+
+- **Repository**: `luisreadymind/devops-analyzer-api`
+- **Container Registry**: `ghcr.io/luisreadymind/devops-analyzer-api`
+- **Azure App Service**: `devops-analyzer-api`
+- **Production URL**: `https://devops-analyzer-api.azurewebsites.net`
+
+### 📋 Deploy Manual (Avanzado)
+
+Si prefieres deploy manual o configuración personalizada:
+
+1. **Crear Azure Resources**:
 
 ```bash
 # Variables
-RG="DevOpsAssesment"
-LOCATION="southcentralus"
+RG="devops-analyzer-api"
+LOCATION="southcentralus" 
 STORAGE_ACCOUNT="devopsassessstorage"
 OPENAI_NAME="devops-openai"
 WEBAPP_NAME="devops-analyzer-api"
@@ -192,34 +272,63 @@ az role assignment create \
   --assignee $PRINCIPAL_ID \
   --role "Storage Blob Data Contributor" \
   --scope "/subscriptions/<SUBSCRIPTION_ID>/resourceGroups/$RG/providers/Microsoft.Storage/storageAccounts/$STORAGE_ACCOUNT"
-
-# Get OpenAI API Key (set as secret or use Key Vault)
-az cognitiveservices account keys list \
-  --name $OPENAI_NAME \
-  --resource-group $RG
 ```
 
-### 2. Configure GitHub Secrets
+2. **Configurar GitHub Secrets**:
+   - `GITHUB_TOKEN`: Token con permisos para Container Registry
+   - `AZURE_WEBAPP_PUBLISH_PROFILE`: Profile del App Service
 
-1. Get publish profile:
+3. **Deploy manual**:
 ```bash
-az webapp deployment list-publishing-profiles \
-  --name $WEBAPP_NAME \
-  --resource-group $RG \
-  --xml
+# Build y push
+npm run build
+docker build -t ghcr.io/luisalbertoarenas/devops-analyzer-api:latest .
+docker push ghcr.io/luisalbertoarenas/devops-analyzer-api:latest
+
+# Configure Azure container
+az webapp config container set \
+  --name devops-analyzer-api \
+  --resource-group devops-analyzer-api \
+  --docker-custom-image-name ghcr.io/luisalbertoarenas/devops-analyzer-api:latest
 ```
 
-2. Add to GitHub repository secrets:
-   - `AZURE_WEBAPP_PUBLISH_PROFILE`: (paste the XML output)
+### 🔧 Deploy Scripts Disponibles
 
-### 3. Deploy
+| Script | Propósito | Uso |
+|--------|-----------|-----|
+| `pre-deploy-check.sh` | Validación pre-deploy | `./pre-deploy-check.sh` |
+| `deploy-analyzer-api.sh` | Deploy completo automatizado | `./deploy-analyzer-api.sh` |
+| `.env.deploy.example` | Template de configuración | `cp .env.deploy.example .env.deploy` |
 
-Push to main branch or trigger workflow manually:
+### 📊 Monitoreo Post-Deploy
+
+Después del deploy, usa estos comandos para monitoreo:
+
 ```bash
-git add .
-git commit -m "Initial commit"
-git push origin main
+# Health check
+curl https://devops-analyzer-api.azurewebsites.net/health
+
+# API status 
+curl https://devops-analyzer-api.azurewebsites.net/api/status
+
+# Ver logs en tiempo real
+az webapp log tail --name devops-analyzer-api --resource-group devops-analyzer-api
+
+# Test completo del assessment endpoint
+curl -X POST https://devops-analyzer-api.azurewebsites.net/api/assessment \
+  -H "Content-Type: application/json" \
+  -d '{"companyName":"Test Company","industry":"Technology"}'
 ```
+
+### 🐛 Troubleshooting Deploy
+
+Si el deploy falla, verifica:
+
+1. **GitHub Token**: `echo $GITHUB_TOKEN` debe retornar tu token
+2. **Azure Login**: `az account show` debe mostrar tu cuenta
+3. **Docker**: `docker info` debe ejecutarse sin errores  
+4. **Compilación**: `npm run build` debe completarse exitosamente
+5. **Logs**: Revisar logs con `az webapp log tail`
 
 ## 🧪 Testing
 

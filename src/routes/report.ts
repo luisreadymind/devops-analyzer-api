@@ -73,6 +73,27 @@ router.post('/generate-report', upload.single('file'), async (req: Request, res:
       }
       throw new AppError(400, `File upload error: ${error.message}`);
     }
+    
+    // Handle PDF processing errors with more helpful messages
+    if (error instanceof Error && error.message.includes('PDF Processing Error:')) {
+      logger.warn({ 
+        fileName: req.file?.originalname,
+        fileSize: req.file?.size,
+        error: error.message 
+      }, 'PDF contains no extractable text');
+      
+      throw new AppError(400, {
+        type: 'PDF_NO_TEXT',
+        message: error.message,
+        suggestions: [
+          'Ensure the PDF contains selectable text (not just images)',
+          'Try using OCR software to convert image-based PDFs to text-based PDFs',
+          'Verify the PDF is not corrupted or password-protected',
+          'Use a different PDF file with readable text content'
+        ]
+      });
+    }
+    
     throw error;
   }
 });
