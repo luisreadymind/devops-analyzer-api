@@ -296,7 +296,7 @@ export class WordExporterService {
   }
 
   private createWAFEvaluation(data: DevOpsAnalysis, radarBuffer: Buffer, barBuffer: Buffer): (Paragraph | Table)[] {
-    const elements: (Paragraph | Table | ImageRun)[] = [
+    const elements: (Paragraph | Table)[] = [
       new Paragraph({
         text: 'Evaluación por Pilar WAF',
         heading: HeadingLevel.HEADING_1,
@@ -385,7 +385,7 @@ export class WordExporterService {
 
   private createWorkPlan(data: DevOpsAnalysis, pieBuffer: Buffer): (Paragraph | Table)[] {
     const plan = data.planTrabajo;
-    const elements: (Paragraph | Table | ImageRun)[] = [
+    const elements: (Paragraph | Table)[] = [
       new Paragraph({
         text: 'Plan de Trabajo',
         heading: HeadingLevel.HEADING_1,
@@ -452,7 +452,7 @@ export class WordExporterService {
   }
 
   private createEvolutionProjection(data: DevOpsAnalysis, evolutionBuffer: Buffer): (Paragraph | Table)[] {
-    const elements: (Paragraph | Table | ImageRun)[] = [
+    const elements: (Paragraph | Table)[] = [
       new Paragraph({
         text: 'Proyección de Evolución',
         heading: HeadingLevel.HEADING_1,
