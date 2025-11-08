@@ -19,10 +19,11 @@ NC='\033[0m' # No Color
 BOLD='\033[1m'
 
 # Configuración
+
 REPO_OWNER="luisreadymind"
 REPO_NAME="devops-analyzer-api"
 AZURE_APP_NAME="devops-analyzer-api"
-AZURE_RG="devops-analyzer-api"
+AZURE_RG="DevOpsAssesment"
 AZURE_URL="https://devops-analyzer-api.azurewebsites.net"
 REGISTRY="ghcr.io"
 IMAGE_NAME="$REGISTRY/$REPO_OWNER/devops-analyzer-api"
@@ -294,7 +295,7 @@ check_and_update_container() {
         
         # Reiniciar App Service
         log_info "Reiniciando Azure App Service..."
-        if az webapp restart --name "$AZURE_APP_NAME" --resource-group "$AZURE_RG" >/dev/null; then
+    if az webapp restart --name "$AZURE_APP_NAME" --resource-group "$AZURE_RG" >/dev/null; then
             log_success "App Service reiniciado ✓"
         else
             log_error "Error al reiniciar App Service"
@@ -389,50 +390,50 @@ validate_application() {
 generate_final_report() {
     log_step "7" "GENERANDO REPORTE FINAL"
     
-    local report_file="github-deploy-report-$BUILD_DATE.json"
-    local deploy_tag=$(cat /tmp/deploy_tag 2>/dev/null || echo "unknown")
-    local current_commit=$(cat /tmp/current_commit_hash 2>/dev/null || git rev-parse HEAD)
-    local current_image=$(cat /tmp/current_container_image 2>/dev/null || echo "unknown")
+        local report_file="github-deploy-report-$BUILD_DATE.json"
+        local deploy_tag=$(cat /tmp/deploy_tag 2>/dev/null || echo "unknown")
+        local current_commit=$(cat /tmp/current_commit_hash 2>/dev/null || git rev-parse HEAD)
+        local current_image=$(cat /tmp/current_container_image 2>/dev/null || echo "unknown")
     
-    # Crear reporte completo
-    cat > "$report_file" << EOF
+        # Crear reporte completo
+        cat > "$report_file" << EOF
 {
-  "deployment": {
-    "timestamp": "$(date -u '+%Y-%m-%dT%H:%M:%S.000Z')",
-    "buildId": "$BUILD_DATE",
-    "status": "SUCCESS",
-    "method": "GitHub Actions + Azure Container Update"
-  },
-  "git": {
-    "repository": "$REPO_OWNER/$REPO_NAME",
-    "commit": "$current_commit",
-    "tag": "$deploy_tag",
-    "branch": "$(git branch --show-current)"
-  },
-  "github": {
-    "actionsMonitored": true,
-    "maxWaitTime": "${MAX_WAIT_ACTIONS}s",
-    "status": "completed_successfully"
-  },
-  "azure": {
-    "appService": "$AZURE_APP_NAME",
-    "resourceGroup": "$AZURE_RG",
-    "url": "$AZURE_URL",
-    "containerImage": "$current_image",
-    "restartPerformed": true,
-    "postRestartWait": "${POST_RESTART_WAIT}s"
-  },
-  "validation": {
-    "healthCheck": "PASSED",
-    "apiStatus": "PASSED",
-    "assessmentEndpoint": "PASSED",
-    "overallStatus": "ALL_TESTS_PASSED"
-  },
-  "timing": {
-    "totalDuration": "$(( $(date +%s) - $(cat /tmp/script_start_time 2>/dev/null || echo $(date +%s)) ))s",
-    "actionsWait": "${MAX_WAIT_ACTIONS}s",
-    "postRestartWait": "${POST_RESTART_WAIT}s"
-  }
+    "deployment": {
+        "timestamp": "$(date -u '+%Y-%m-%dT%H:%M:%S.000Z')",
+        "buildId": "$BUILD_DATE",
+        "status": "SUCCESS",
+        "method": "GitHub Actions + Azure Container Update"
+    },
+    "git": {
+        "repository": "$REPO_OWNER/$REPO_NAME",
+        "commit": "$current_commit",
+        "tag": "$deploy_tag",
+        "branch": "$(git branch --show-current)"
+    },
+    "github": {
+        "actionsMonitored": true,
+        "maxWaitTime": "${MAX_WAIT_ACTIONS}s",
+        "status": "completed_successfully"
+    },
+    "azure": {
+        "appService": "$AZURE_APP_NAME",
+        "resourceGroup": "$AZURE_RG",
+        "url": "$AZURE_URL",
+        "containerImage": "$current_image",
+        "restartPerformed": true,
+        "postRestartWait": "${POST_RESTART_WAIT}s"
+    },
+    "validation": {
+        "healthCheck": "PASSED",
+        "apiStatus": "PASSED",
+        "assessmentEndpoint": "PASSED",
+        "overallStatus": "ALL_TESTS_PASSED"
+    },
+    "timing": {
+        "totalDuration": "$(( $(date +%s) - $(cat /tmp/script_start_time 2>/dev/null || echo $(date +%s)) ))s",
+        "actionsWait": "${MAX_WAIT_ACTIONS}s",
+        "postRestartWait": "${POST_RESTART_WAIT}s"
+    }
 }
 EOF
     
