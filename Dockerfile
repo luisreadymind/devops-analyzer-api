@@ -1,7 +1,19 @@
 # Build stage
+
 FROM node:20-alpine AS builder
 
 WORKDIR /app
+
+# Instala dependencias necesarias para canvas en builder
+RUN apk add --no-cache \
+  cairo-dev \
+  pango-dev \
+  giflib-dev \
+  libjpeg-turbo-dev \
+  libpng-dev \
+  librsvg-dev \
+  build-base \
+  python3
 
 # Copy package files
 COPY package.json ./
