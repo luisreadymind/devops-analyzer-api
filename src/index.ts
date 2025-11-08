@@ -36,6 +36,18 @@ app.get('/health', (_req, res) => {
 app.use('/api', reportRoutes);
 
 // 404 handler
+
+// Status endpoint for deploy validation
+app.get('/api/status', (_req, res) => {
+  res.json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    version: '1.0.0',
+    message: 'API is running'
+  });
+});
+
+// 404 handler
 app.use((_req, res) => {
   res.status(404).json({
     status: 'error',

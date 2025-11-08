@@ -288,8 +288,8 @@ check_and_update_container() {
     if az webapp config container set \
         --name "$AZURE_APP_NAME" \
         --resource-group "$AZURE_RG" \
-        --docker-custom-image-name "$expected_image" \
-        --docker-registry-server-url "https://$REGISTRY" >/dev/null; then
+        --container-image-name "$expected_image" \
+        --container-registry-url "https://$REGISTRY" >/dev/null; then
         
         log_success "Container configurado con imagen: $expected_image ✓"
         
