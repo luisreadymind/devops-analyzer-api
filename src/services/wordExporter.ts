@@ -295,7 +295,7 @@ export class WordExporterService {
     ];
   }
 
-  private createWAFEvaluation(data: DevOpsAnalysis, radarBuffer: Buffer, barBuffer: Buffer): (Paragraph | Table | ImageRun)[] {
+  private createWAFEvaluation(data: DevOpsAnalysis, radarBuffer: Buffer, barBuffer: Buffer): (Paragraph | Table)[] {
     const elements: (Paragraph | Table | ImageRun)[] = [
       new Paragraph({
         text: 'Evaluación por Pilar WAF',
@@ -383,7 +383,7 @@ export class WordExporterService {
     return elements;
   }
 
-  private createWorkPlan(data: DevOpsAnalysis, pieBuffer: Buffer): (Paragraph | Table | ImageRun)[] {
+  private createWorkPlan(data: DevOpsAnalysis, pieBuffer: Buffer): (Paragraph | Table)[] {
     const plan = data.planTrabajo;
     const elements: (Paragraph | Table | ImageRun)[] = [
       new Paragraph({
@@ -451,7 +451,7 @@ export class WordExporterService {
     return elements;
   }
 
-  private createEvolutionProjection(data: DevOpsAnalysis, evolutionBuffer: Buffer): (Paragraph | Table | ImageRun)[] {
+  private createEvolutionProjection(data: DevOpsAnalysis, evolutionBuffer: Buffer): (Paragraph | Table)[] {
     const elements: (Paragraph | Table | ImageRun)[] = [
       new Paragraph({
         text: 'Proyección de Evolución',
