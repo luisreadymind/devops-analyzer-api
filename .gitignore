@@ -41,3 +41,59 @@ uploads/
 # Azure
 .azure/
 publish-profile.xml
+
+# Test files and reports
+test_*.py
+test_*.sh
+test_*.json
+test_*.txt
+test_*.html
+response_test.json
+*_test.*
+report_*.json
+report_*.html
+report_*.pdf
+report_*.pdf.html
+
+# Deploy scripts and validation
+deploy_*.sh
+github-push-deploy-validator.sh
+github-deploy-report-*.json
+pre-deploy-check.sh
+deploy-master.sh
+cleanup-api-workspace.sh
+
+# Backup files
+*.bak
+*.backup
+backups/
+*_backup.*
+
+# Temporary and generated files
+*.tmp
+*.temp
+QUICK-COMMANDS.md
+WSL-COMMANDS-REFERENCE.md
+troubleshooting.md
+*_deploy.*
+*_validation.*
+*_report.*
+
+# Python virtual environments
+venv/
+env/
+ENV/
+.venv/
+.env*/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Local development files
+.local
+local.settings.json
+.env.deploy.example
