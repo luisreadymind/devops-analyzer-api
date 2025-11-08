@@ -1,4 +1,5 @@
-import { Document, Packer, Paragraph, Table, TableCell, TableRow, WidthType, AlignmentType, HeadingLevel, TextRun } from 'docx';
+import { Document, Packer, Paragraph, Table, TableCell, TableRow, WidthType, AlignmentType, HeadingLevel, TextRun, ImageRun } from 'docx';
+import { ChartJSNodeCanvas } from 'chartjs-node-canvas';
 
 // Interfaces para el análisis DevOps
 interface PilarWAF {
@@ -87,24 +88,29 @@ interface DevOpsAnalysis {
 // const GREEN_RGB = { r: 81, g: 255, b: 120 }; // #51FF78
 
 export class WordExporterService {
-  // private chartJS: ChartJSNodeCanvas; // Comentado por ahora
+  private chartJS: ChartJSNodeCanvas;
 
   constructor() {
-    // Inicializar ChartJS para generar gráficos (comentado por ahora)
-    // this.chartJS = new ChartJSNodeCanvas({
-    //   width: 800,
-    //   height: 600,
-    //   chartCallback: (ChartJS) => {
-    //     ChartJS.defaults.responsive = true;
-    //     ChartJS.defaults.maintainAspectRatio = false;
-    //   }
-    // });
+    this.chartJS = new ChartJSNodeCanvas({
+      width: 800,
+      height: 600,
+      chartCallback: (ChartJS) => {
+        ChartJS.defaults.responsive = true;
+        ChartJS.defaults.maintainAspectRatio = false;
+      }
+    });
   }
 
   /**
    * Genera un documento Word con el reporte completo de madurez DevOps
    */
   async generateDevOpsReportWord(data: DevOpsAnalysis): Promise<Buffer> {
+    // Generar gráficos
+    const radarBuffer = await this.generateRadarChart(data);
+    const barBuffer = await this.generateBarChart(data);
+    const evolutionBuffer = await this.generateEvolutionChart(data);
+    const pieBuffer = await this.generatePieChart(data);
+
     const sections = [
       {
         children: [
@@ -112,10 +118,10 @@ export class WordExporterService {
           ...this.createGeneralInfo(data),
           ...this.createExecutiveSummary(data),
           ...this.createGlobalResult(data),
-          ...this.createWAFEvaluation(data),
+          ...this.createWAFEvaluation(data, radarBuffer, barBuffer),
           ...this.createRecommendations(data),
-          ...this.createWorkPlan(data),
-          ...this.createEvolutionProjection(data),
+          ...this.createWorkPlan(data, pieBuffer),
+          ...this.createEvolutionProjection(data, evolutionBuffer),
           ...this.createRoadmap(data),
           ...this.createAzureServicesTable(),
           ...this.createConclusion(),
@@ -289,8 +295,8 @@ export class WordExporterService {
     ];
   }
 
-  private createWAFEvaluation(data: DevOpsAnalysis): (Paragraph | Table)[] {
-    const elements: (Paragraph | Table)[] = [
+  private createWAFEvaluation(data: DevOpsAnalysis, radarBuffer: Buffer, barBuffer: Buffer): (Paragraph | Table | ImageRun)[] {
+    const elements: (Paragraph | Table | ImageRun)[] = [
       new Paragraph({
         text: 'Evaluación por Pilar WAF',
         heading: HeadingLevel.HEADING_1,
@@ -325,8 +331,13 @@ export class WordExporterService {
 
     elements.push(table);
 
-    // Gráfico radar (simplificado por ahora)
-    // TODO: Implementar gráfico radar con ChartJS
+    // Insertar gráfico radar
+    elements.push(new Paragraph({ text: 'Gráfico Radar: Situación Actual vs. Esperada', heading: HeadingLevel.HEADING_2 }));
+    elements.push(new ImageRun({ data: radarBuffer, transformation: { width: 500, height: 350 } }));
+
+    // Insertar gráfico de barras
+    elements.push(new Paragraph({ text: 'Gráfico de Barras: Resultados por Calificación', heading: HeadingLevel.HEADING_2 }));
+    elements.push(new ImageRun({ data: barBuffer, transformation: { width: 500, height: 350 } }));
 
     return elements;
   }
@@ -372,9 +383,9 @@ export class WordExporterService {
     return elements;
   }
 
-  private createWorkPlan(data: DevOpsAnalysis): (Paragraph | Table)[] {
+  private createWorkPlan(data: DevOpsAnalysis, pieBuffer: Buffer): (Paragraph | Table | ImageRun)[] {
     const plan = data.planTrabajo;
-    const elements: (Paragraph | Table)[] = [
+    const elements: (Paragraph | Table | ImageRun)[] = [
       new Paragraph({
         text: 'Plan de Trabajo',
         heading: HeadingLevel.HEADING_1,
@@ -433,13 +444,15 @@ export class WordExporterService {
 
     elements.push(table);
 
-    // TODO: Agregar gráficos de barras y pie para roles
+    // Insertar gráfico de pie
+    elements.push(new Paragraph({ text: 'Gráfico de Pie: Total de Horas por Rol', heading: HeadingLevel.HEADING_2 }));
+    elements.push(new ImageRun({ data: pieBuffer, transformation: { width: 500, height: 350 } }));
 
     return elements;
   }
 
-  private createEvolutionProjection(data: DevOpsAnalysis): (Paragraph | Table)[] {
-    const elements: (Paragraph | Table)[] = [
+  private createEvolutionProjection(data: DevOpsAnalysis, evolutionBuffer: Buffer): (Paragraph | Table | ImageRun)[] {
+    const elements: (Paragraph | Table | ImageRun)[] = [
       new Paragraph({
         text: 'Proyección de Evolución',
         heading: HeadingLevel.HEADING_1,
@@ -478,7 +491,127 @@ export class WordExporterService {
     });
 
     elements.push(table);
+
+    // Insertar gráfico de evolución
+    elements.push(new Paragraph({ text: 'Gráfico de Evolución Esperada', heading: HeadingLevel.HEADING_2 }));
+    elements.push(new ImageRun({ data: evolutionBuffer, transformation: { width: 500, height: 350 } }));
+
     return elements;
+  }
+  // --- Métodos para generar gráficos ---
+  private async generateRadarChart(data: DevOpsAnalysis): Promise<Buffer> {
+    // Radar: situación actual vs. esperada
+    const labels = data.capacidadWAF.map(p => p.pilar);
+    const actual = data.capacidadWAF.map(p => p.puntaje);
+    // Promedio de madurez esperada por pilar (usando el último mes de proyección)
+    const lastProjection = data.proyeccionEvolucion[data.proyeccionEvolucion.length - 1];
+    const expected = labels.map(_ => lastProjection ? lastProjection.madurezEsperada : 0);
+    const config = {
+      type: 'radar',
+      data: {
+        labels,
+        datasets: [
+          {
+            label: 'Actual',
+            data: actual,
+            backgroundColor: 'rgba(0,120,212,0.2)',
+            borderColor: 'rgba(0,120,212,1)',
+          },
+          {
+            label: 'Esperada',
+            data: expected,
+            backgroundColor: 'rgba(127,63,191,0.2)',
+            borderColor: 'rgba(127,63,191,1)',
+          },
+        ],
+      },
+      options: {
+        plugins: { legend: { position: 'top' } },
+        scales: { r: { min: 0, max: 100 } },
+      },
+    };
+    return await this.chartJS.renderToBuffer(config);
+  }
+
+  private async generateBarChart(data: DevOpsAnalysis): Promise<Buffer> {
+    // Barras: resultado por calificación
+    const labels = data.capacidadWAF.map(p => p.pilar);
+    const scores = data.capacidadWAF.map(p => p.puntaje);
+    const config = {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [
+          {
+            label: 'Puntaje',
+            data: scores,
+            backgroundColor: 'rgba(0,120,212,0.7)',
+          },
+        ],
+      },
+      options: {
+        plugins: { legend: { display: false } },
+        scales: { y: { min: 0, max: 100 } },
+      },
+    };
+    return await this.chartJS.renderToBuffer(config);
+  }
+
+  private async generateEvolutionChart(data: DevOpsAnalysis): Promise<Buffer> {
+    // Evolución esperada al aplicar recomendaciones
+    const labels = data.proyeccionEvolucion.map(p => p.mes);
+    const madurez = data.proyeccionEvolucion.map(p => p.madurezEsperada);
+    const config = {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          {
+            label: 'Madurez Esperada (%)',
+            data: madurez,
+            fill: false,
+            borderColor: 'rgba(81,255,120,1)',
+            backgroundColor: 'rgba(81,255,120,0.2)',
+            tension: 0.3,
+          },
+        ],
+      },
+      options: {
+        plugins: { legend: { position: 'top' } },
+        scales: { y: { min: 0, max: 100 } },
+      },
+    };
+    return await this.chartJS.renderToBuffer(config);
+  }
+
+  private async generatePieChart(data: DevOpsAnalysis): Promise<Buffer> {
+    // Pie: total de horas por rol
+    const roles = data.planTrabajo.resumenRoles.map(r => r.rol);
+    const horas = data.planTrabajo.resumenRoles.map(r => r.horas);
+    const config = {
+      type: 'pie',
+      data: {
+        labels: roles,
+        datasets: [
+          {
+            label: 'Horas por Rol',
+            data: horas,
+            backgroundColor: [
+              'rgba(0,120,212,0.7)',
+              'rgba(127,63,191,0.7)',
+              'rgba(81,255,120,0.7)',
+              'rgba(255,205,86,0.7)',
+              'rgba(255,99,132,0.7)',
+              'rgba(54,162,235,0.7)',
+            ],
+          },
+        ],
+      },
+      options: {
+        plugins: { legend: { position: 'right' } },
+      },
+    };
+    return await this.chartJS.renderToBuffer(config);
   }
 
   private createRoadmap(data: DevOpsAnalysis): (Paragraph | Table)[] {
