@@ -332,12 +332,12 @@ export class WordExporterService {
     elements.push(table);
 
     // Insertar gráfico radar
-    elements.push(new Paragraph({ text: 'Gráfico Radar: Situación Actual vs. Esperada', heading: HeadingLevel.HEADING_2 }));
-    elements.push(new ImageRun({ data: radarBuffer, transformation: { width: 500, height: 350 } }));
+  elements.push(new Paragraph({ text: 'Gráfico Radar: Situación Actual vs. Esperada', heading: HeadingLevel.HEADING_2 }));
+  elements.push(new Paragraph({ children: [ new ImageRun({ data: radarBuffer, transformation: { width: 500, height: 350 }, type: 'image/png' } as any) ] }));
 
     // Insertar gráfico de barras
-    elements.push(new Paragraph({ text: 'Gráfico de Barras: Resultados por Calificación', heading: HeadingLevel.HEADING_2 }));
-    elements.push(new ImageRun({ data: barBuffer, transformation: { width: 500, height: 350 } }));
+  elements.push(new Paragraph({ text: 'Gráfico de Barras: Resultados por Calificación', heading: HeadingLevel.HEADING_2 }));
+  elements.push(new Paragraph({ children: [ new ImageRun({ data: barBuffer, transformation: { width: 500, height: 350 }, type: 'image/png' } as any) ] }));
 
     return elements;
   }
@@ -445,8 +445,8 @@ export class WordExporterService {
     elements.push(table);
 
     // Insertar gráfico de pie
-    elements.push(new Paragraph({ text: 'Gráfico de Pie: Total de Horas por Rol', heading: HeadingLevel.HEADING_2 }));
-    elements.push(new ImageRun({ data: pieBuffer, transformation: { width: 500, height: 350 } }));
+  elements.push(new Paragraph({ text: 'Gráfico de Pie: Total de Horas por Rol', heading: HeadingLevel.HEADING_2 }));
+  elements.push(new Paragraph({ children: [ new ImageRun({ data: pieBuffer, transformation: { width: 500, height: 350 }, type: 'image/png' } as any) ] }));
 
     return elements;
   }
@@ -493,8 +493,8 @@ export class WordExporterService {
     elements.push(table);
 
     // Insertar gráfico de evolución
-    elements.push(new Paragraph({ text: 'Gráfico de Evolución Esperada', heading: HeadingLevel.HEADING_2 }));
-    elements.push(new ImageRun({ data: evolutionBuffer, transformation: { width: 500, height: 350 } }));
+  elements.push(new Paragraph({ text: 'Gráfico de Evolución Esperada', heading: HeadingLevel.HEADING_2 }));
+  elements.push(new Paragraph({ children: [ new ImageRun({ data: evolutionBuffer, transformation: { width: 500, height: 350 }, type: 'image/png' } as any) ] }));
 
     return elements;
   }
