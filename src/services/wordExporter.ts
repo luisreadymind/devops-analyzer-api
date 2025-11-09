@@ -92,11 +92,12 @@ export class WordExporterService {
 
   constructor() {
     this.chartJS = new ChartJSNodeCanvas({
-      width: 800,
-      height: 600,
+      width: 1200,
+      height: 800,
       chartCallback: (ChartJS) => {
         ChartJS.defaults.responsive = true;
         ChartJS.defaults.maintainAspectRatio = false;
+        ChartJS.defaults.devicePixelRatio = 2;
       }
     });
   }
@@ -180,19 +181,40 @@ export class WordExporterService {
   private createCoverPage(data: DevOpsAnalysis): Paragraph[] {
     return [
       new Paragraph({
-        text: 'REPORTE DE MADUREZ DEVOPS',
+        children: [
+          new TextRun({
+            text: 'REPORTE DE MADUREZ DEVOPS',
+            font: 'Aptos',
+            size: 24,
+          }),
+        ],
         heading: HeadingLevel.TITLE,
         alignment: AlignmentType.LEFT,
+        spacing: { after: 400 },
       }),
       new Paragraph({
-        text: 'Readymind México – Evaluación basada en Azure Well-Architected Framework y CMMI',
+        children: [
+          new TextRun({
+            text: 'Readymind México – Evaluación basada en Azure Well-Architected Framework y CMMI',
+            font: 'Aptos',
+            size: 16,
+          }),
+        ],
         heading: HeadingLevel.HEADING_2,
         alignment: AlignmentType.LEFT,
+        spacing: { after: 300 },
       }),
       new Paragraph({
-        text: `Cliente: ${data.cliente}`,
+        children: [
+          new TextRun({
+            text: `Cliente: ${data.cliente}`,
+            font: 'Aptos',
+            size: 14,
+          }),
+        ],
         heading: HeadingLevel.HEADING_3,
         alignment: AlignmentType.LEFT,
+        spacing: { after: 600 },
       }),
     ];
   }
@@ -200,26 +222,36 @@ export class WordExporterService {
   private createGeneralInfo(data: DevOpsAnalysis): Paragraph[] {
     return [
       new Paragraph({
-        text: 'Información General',
+        children: [
+          new TextRun({
+            text: 'Información General',
+            font: 'Aptos',
+            size: 24,
+          }),
+        ],
         heading: HeadingLevel.HEADING_1,
+        spacing: { after: 300 },
       }),
       new Paragraph({
         children: [
-          new TextRun({ text: 'Cliente: ', bold: true }),
-          new TextRun(data.cliente),
+          new TextRun({ text: 'Cliente: ', bold: true, font: 'Aptos', size: 11 }),
+          new TextRun({ text: data.cliente, font: 'Aptos', size: 11 }),
         ],
+        spacing: { after: 200 },
       }),
       new Paragraph({
         children: [
-          new TextRun({ text: 'Evaluador: ', bold: true }),
-          new TextRun(data.evaluador || 'Equipo Readymind'),
+          new TextRun({ text: 'Evaluador: ', bold: true, font: 'Aptos', size: 11 }),
+          new TextRun({ text: data.evaluador || 'Equipo Readymind', font: 'Aptos', size: 11 }),
         ],
+        spacing: { after: 200 },
       }),
       new Paragraph({
         children: [
-          new TextRun({ text: 'Fecha Assessment: ', bold: true }),
-          new TextRun(data.fechaAssessment),
+          new TextRun({ text: 'Fecha Assessment: ', bold: true, font: 'Aptos', size: 11 }),
+          new TextRun({ text: data.fechaAssessment, font: 'Aptos', size: 11 }),
         ],
+        spacing: { after: 400 },
       }),
     ];
   }
@@ -228,34 +260,87 @@ export class WordExporterService {
     const resumen = data.resumenEjecutivo;
     const paragraphs: Paragraph[] = [
       new Paragraph({
-        text: 'Resumen Ejecutivo',
+        children: [
+          new TextRun({
+            text: 'Resumen Ejecutivo',
+            font: 'Aptos',
+            size: 24,
+          }),
+        ],
         heading: HeadingLevel.HEADING_1,
+        spacing: { after: 300 },
       }),
       new Paragraph({
-        text: 'Diagnóstico general',
+        children: [
+          new TextRun({
+            text: 'Diagnóstico general',
+            font: 'Aptos',
+            size: 16,
+          }),
+        ],
         heading: HeadingLevel.HEADING_2,
+        spacing: { after: 200 },
       }),
-      new Paragraph(resumen.diagnostico),
       new Paragraph({
-        text: 'Hallazgos principales',
+        children: [
+          new TextRun({
+            text: resumen.diagnostico,
+            font: 'Aptos',
+            size: 11,
+          }),
+        ],
+        spacing: { after: 300 },
+      }),
+      new Paragraph({
+        children: [
+          new TextRun({
+            text: 'Hallazgos principales',
+            font: 'Aptos',
+            size: 16,
+          }),
+        ],
         heading: HeadingLevel.HEADING_2,
+        spacing: { after: 200 },
       }),
     ];
 
     // Agregar hallazgos principales
     resumen.hallazgosPrincipales.forEach(h => {
       paragraphs.push(new Paragraph({
-        text: `• ${h}`,
+        children: [
+          new TextRun({
+            text: `• ${h}`,
+            font: 'Aptos',
+            size: 11,
+          }),
+        ],
         bullet: { level: 0 },
+        spacing: { after: 150 },
       }));
     });
 
     paragraphs.push(
       new Paragraph({
-        text: 'Impacto en el negocio',
+        children: [
+          new TextRun({
+            text: 'Impacto en el negocio',
+            font: 'Aptos',
+            size: 16,
+          }),
+        ],
         heading: HeadingLevel.HEADING_2,
+        spacing: { after: 200 },
       }),
-      new Paragraph(resumen.impactoNegocio)
+      new Paragraph({
+        children: [
+          new TextRun({
+            text: resumen.impactoNegocio,
+            font: 'Aptos',
+            size: 11,
+          }),
+        ],
+        spacing: { after: 400 },
+      })
     );
 
     return paragraphs;
@@ -265,32 +350,43 @@ export class WordExporterService {
     const resultado = data.resultadoGlobal;
     return [
       new Paragraph({
-        text: 'Resultado Global',
+        children: [
+          new TextRun({
+            text: 'Resultado Global',
+            font: 'Aptos',
+            size: 24,
+          }),
+        ],
         heading: HeadingLevel.HEADING_1,
+        spacing: { after: 300 },
       }),
       new Paragraph({
         children: [
-          new TextRun({ text: 'Puntuación total: ', bold: true }),
-          new TextRun(resultado.puntuacionTotal.toString()),
+          new TextRun({ text: 'Puntuación total: ', bold: true, font: 'Aptos', size: 11 }),
+          new TextRun({ text: resultado.puntuacionTotal.toString(), font: 'Aptos', size: 11 }),
         ],
+        spacing: { after: 200 },
       }),
       new Paragraph({
         children: [
-          new TextRun({ text: 'Nivel predominante: ', bold: true }),
-          new TextRun(resultado.nivelPredominante),
+          new TextRun({ text: 'Nivel predominante: ', bold: true, font: 'Aptos', size: 11 }),
+          new TextRun({ text: resultado.nivelPredominante, font: 'Aptos', size: 11 }),
         ],
+        spacing: { after: 200 },
       }),
       new Paragraph({
         children: [
-          new TextRun({ text: 'Áreas críticas: ', bold: true }),
-          new TextRun(resultado.areasCriticas.join(', ')),
+          new TextRun({ text: 'Áreas críticas: ', bold: true, font: 'Aptos', size: 11 }),
+          new TextRun({ text: resultado.areasCriticas.join(', '), font: 'Aptos', size: 11 }),
         ],
+        spacing: { after: 200 },
       }),
       new Paragraph({
         children: [
-          new TextRun({ text: 'Áreas fuertes: ', bold: true }),
-          new TextRun(resultado.areasFuertes.join(', ')),
+          new TextRun({ text: 'Áreas fuertes: ', bold: true, font: 'Aptos', size: 11 }),
+          new TextRun({ text: resultado.areasFuertes.join(', '), font: 'Aptos', size: 11 }),
         ],
+        spacing: { after: 400 },
       }),
     ];
   }
@@ -298,8 +394,15 @@ export class WordExporterService {
   private createWAFEvaluation(data: DevOpsAnalysis, radarBuffer: Buffer, barBuffer: Buffer): (Paragraph | Table)[] {
     const elements: (Paragraph | Table)[] = [
       new Paragraph({
-        text: 'Evaluación por Pilar WAF',
+        children: [
+          new TextRun({
+            text: 'Evaluación por Pilar WAF',
+            font: 'Aptos',
+            size: 24,
+          }),
+        ],
         heading: HeadingLevel.HEADING_1,
+        spacing: { after: 300 },
       }),
     ];
 
@@ -312,17 +415,17 @@ export class WordExporterService {
       rows: [
         new TableRow({
           children: [
-            new TableCell({ children: [new Paragraph('Pilar')] }),
-            new TableCell({ children: [new Paragraph('Puntaje')] }),
-            new TableCell({ children: [new Paragraph('Observaciones')] }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Pilar', font: 'Aptos', size: 11 })] })] }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Puntaje', font: 'Aptos', size: 11 })] })] }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Observaciones', font: 'Aptos', size: 11 })] })] }),
           ],
         }),
         ...data.capacidadWAF.map(pilar =>
           new TableRow({
             children: [
-              new TableCell({ children: [new Paragraph(pilar.pilar)] }),
-              new TableCell({ children: [new Paragraph(pilar.puntaje.toString())] }),
-              new TableCell({ children: [new Paragraph(pilar.observaciones)] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: pilar.pilar, font: 'Aptos', size: 11 })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: pilar.puntaje.toString(), font: 'Aptos', size: 11 })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: pilar.observaciones, font: 'Aptos', size: 11 })] })] }),
             ],
           })
         ),
@@ -332,12 +435,38 @@ export class WordExporterService {
     elements.push(table);
 
     // Insertar gráfico radar
-  elements.push(new Paragraph({ text: 'Gráfico Radar: Situación Actual vs. Esperada', heading: HeadingLevel.HEADING_2 }));
-  elements.push(new Paragraph({ children: [ new ImageRun({ data: radarBuffer, transformation: { width: 500, height: 350 }, type: 'image/png' } as any) ] }));
+    elements.push(new Paragraph({
+      children: [
+        new TextRun({
+          text: 'Gráfico Radar: Situación Actual vs. Esperada',
+          font: 'Aptos',
+          size: 16,
+        }),
+      ],
+      heading: HeadingLevel.HEADING_2,
+      spacing: { after: 200, before: 400 },
+    }));
+    elements.push(new Paragraph({
+      children: [ new ImageRun({ data: radarBuffer, transformation: { width: 500, height: 350 }, type: 'image/png' } as any) ],
+      spacing: { after: 400 },
+    }));
 
     // Insertar gráfico de barras
-  elements.push(new Paragraph({ text: 'Gráfico de Barras: Resultados por Calificación', heading: HeadingLevel.HEADING_2 }));
-  elements.push(new Paragraph({ children: [ new ImageRun({ data: barBuffer, transformation: { width: 500, height: 350 }, type: 'image/png' } as any) ] }));
+    elements.push(new Paragraph({
+      children: [
+        new TextRun({
+          text: 'Gráfico de Barras: Resultados por Calificación',
+          font: 'Aptos',
+          size: 16,
+        }),
+      ],
+      heading: HeadingLevel.HEADING_2,
+      spacing: { after: 200, before: 200 },
+    }));
+    elements.push(new Paragraph({
+      children: [ new ImageRun({ data: barBuffer, transformation: { width: 500, height: 350 }, type: 'image/png' } as any) ],
+      spacing: { after: 400 },
+    }));
 
     return elements;
   }
@@ -345,8 +474,15 @@ export class WordExporterService {
   private createRecommendations(data: DevOpsAnalysis): (Paragraph | Table)[] {
     const elements: (Paragraph | Table)[] = [
       new Paragraph({
-        text: 'Recomendaciones',
+        children: [
+          new TextRun({
+            text: 'Recomendaciones',
+            font: 'Aptos',
+            size: 24,
+          }),
+        ],
         heading: HeadingLevel.HEADING_1,
+        spacing: { after: 300 },
       }),
     ];
 
@@ -358,21 +494,21 @@ export class WordExporterService {
       rows: [
         new TableRow({
           children: [
-            new TableCell({ children: [new Paragraph('ID')] }),
-            new TableCell({ children: [new Paragraph('Descripción')] }),
-            new TableCell({ children: [new Paragraph('Servicio Azure')] }),
-            new TableCell({ children: [new Paragraph('Prioridad')] }),
-            new TableCell({ children: [new Paragraph('Impacto Esperado')] }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'ID', font: 'Aptos', size: 11 })] })] }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Descripción', font: 'Aptos', size: 11 })] })] }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Servicio Azure', font: 'Aptos', size: 11 })] })] }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Prioridad', font: 'Aptos', size: 11 })] })] }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Impacto Esperado', font: 'Aptos', size: 11 })] })] }),
           ],
         }),
         ...data.recomendaciones.map(rec =>
           new TableRow({
             children: [
-              new TableCell({ children: [new Paragraph(rec.id)] }),
-              new TableCell({ children: [new Paragraph(rec.descripcion)] }),
-              new TableCell({ children: [new Paragraph(rec.servicioAzure)] }),
-              new TableCell({ children: [new Paragraph(rec.prioridad)] }),
-              new TableCell({ children: [new Paragraph(rec.impactoEsperado)] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: rec.id, font: 'Aptos', size: 11 })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: rec.descripcion, font: 'Aptos', size: 11 })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: rec.servicioAzure, font: 'Aptos', size: 11 })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: rec.prioridad, font: 'Aptos', size: 11 })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: rec.impactoEsperado, font: 'Aptos', size: 11 })] })] }),
             ],
           })
         ),
@@ -387,26 +523,36 @@ export class WordExporterService {
     const plan = data.planTrabajo;
     const elements: (Paragraph | Table)[] = [
       new Paragraph({
-        text: 'Plan de Trabajo',
+        children: [
+          new TextRun({
+            text: 'Plan de Trabajo',
+            font: 'Aptos',
+            size: 24,
+          }),
+        ],
         heading: HeadingLevel.HEADING_1,
+        spacing: { after: 300 },
       }),
       new Paragraph({
         children: [
-          new TextRun({ text: 'Horas máximas: ', bold: true }),
-          new TextRun(plan.horasMaximas.toString()),
+          new TextRun({ text: 'Horas máximas: ', bold: true, font: 'Aptos', size: 11 }),
+          new TextRun({ text: plan.horasMaximas.toString(), font: 'Aptos', size: 11 }),
         ],
+        spacing: { after: 200 },
       }),
       new Paragraph({
         children: [
-          new TextRun({ text: 'Periodo: ', bold: true }),
-          new TextRun(`${plan.periodoMaximoMeses} meses`),
+          new TextRun({ text: 'Periodo: ', bold: true, font: 'Aptos', size: 11 }),
+          new TextRun({ text: `${plan.periodoMaximoMeses} meses`, font: 'Aptos', size: 11 }),
         ],
+        spacing: { after: 200 },
       }),
       new Paragraph({
         children: [
-          new TextRun({ text: 'Horas semanales por recurso: ', bold: true }),
-          new TextRun(plan.horasSemanalesPorRecurso.toString()),
+          new TextRun({ text: 'Horas semanales por recurso: ', bold: true, font: 'Aptos', size: 11 }),
+          new TextRun({ text: plan.horasSemanalesPorRecurso.toString(), font: 'Aptos', size: 11 }),
         ],
+        spacing: { after: 300 },
       }),
     ];
 
@@ -419,23 +565,23 @@ export class WordExporterService {
       rows: [
         new TableRow({
           children: [
-            new TableCell({ children: [new Paragraph('ID')] }),
-            new TableCell({ children: [new Paragraph('Descripción')] }),
-            new TableCell({ children: [new Paragraph('Horas')] }),
-            new TableCell({ children: [new Paragraph('Dependencia')] }),
-            new TableCell({ children: [new Paragraph('Rol')] }),
-            new TableCell({ children: [new Paragraph('Fase')] }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'ID', font: 'Aptos', size: 11 })] })] }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Descripción', font: 'Aptos', size: 11 })] })] }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Horas', font: 'Aptos', size: 11 })] })] }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Dependencia', font: 'Aptos', size: 11 })] })] }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Rol', font: 'Aptos', size: 11 })] })] }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Fase', font: 'Aptos', size: 11 })] })] }),
           ],
         }),
         ...plan.tareasDetalladas.map(tarea =>
           new TableRow({
             children: [
-              new TableCell({ children: [new Paragraph(tarea.id_tarea)] }),
-              new TableCell({ children: [new Paragraph(tarea.descripcion)] }),
-              new TableCell({ children: [new Paragraph(tarea.horas_estimadas.toString())] }),
-              new TableCell({ children: [new Paragraph(tarea.dependencia)] }),
-              new TableCell({ children: [new Paragraph(tarea.rol)] }),
-              new TableCell({ children: [new Paragraph(tarea.fase)] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: tarea.id_tarea, font: 'Aptos', size: 11 })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: tarea.descripcion, font: 'Aptos', size: 11 })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: tarea.horas_estimadas.toString(), font: 'Aptos', size: 11 })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: tarea.dependencia, font: 'Aptos', size: 11 })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: tarea.rol, font: 'Aptos', size: 11 })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: tarea.fase, font: 'Aptos', size: 11 })] })] }),
             ],
           })
         ),
@@ -445,8 +591,21 @@ export class WordExporterService {
     elements.push(table);
 
     // Insertar gráfico de pie
-  elements.push(new Paragraph({ text: 'Gráfico de Pie: Total de Horas por Rol', heading: HeadingLevel.HEADING_2 }));
-  elements.push(new Paragraph({ children: [ new ImageRun({ data: pieBuffer, transformation: { width: 500, height: 350 }, type: 'image/png' } as any) ] }));
+    elements.push(new Paragraph({
+      children: [
+        new TextRun({
+          text: 'Gráfico de Pie: Total de Horas por Rol',
+          font: 'Aptos',
+          size: 16,
+        }),
+      ],
+      heading: HeadingLevel.HEADING_2,
+      spacing: { after: 200, before: 400 },
+    }));
+    elements.push(new Paragraph({
+      children: [ new ImageRun({ data: pieBuffer, transformation: { width: 500, height: 350 }, type: 'image/png' } as any) ],
+      spacing: { after: 400 },
+    }));
 
     return elements;
   }
@@ -454,8 +613,15 @@ export class WordExporterService {
   private createEvolutionProjection(data: DevOpsAnalysis, evolutionBuffer: Buffer): (Paragraph | Table)[] {
     const elements: (Paragraph | Table)[] = [
       new Paragraph({
-        text: 'Proyección de Evolución',
+        children: [
+          new TextRun({
+            text: 'Proyección de Evolución',
+            font: 'Aptos',
+            size: 24,
+          }),
+        ],
         heading: HeadingLevel.HEADING_1,
+        spacing: { after: 300 },
       }),
     ];
 
@@ -467,23 +633,22 @@ export class WordExporterService {
       rows: [
         new TableRow({
           children: [
-            new TableCell({ children: [new Paragraph('Mes')] }),
-            new TableCell({ children: [new Paragraph('Madurez Esperada')] }),
-            new TableCell({ children: [new Paragraph('Capacidades Implementadas')] }),
-            new TableCell({ children: [new Paragraph('KPIs Esperados')] }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Mes', font: 'Aptos', size: 11 })] })] }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Madurez Esperada', font: 'Aptos', size: 11 })] })] }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Capacidades Implementadas', font: 'Aptos', size: 11 })] })] }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'KPIs Esperados', font: 'Aptos', size: 11 })] })] }),
           ],
         }),
         ...data.proyeccionEvolucion.map(proy =>
           new TableRow({
             children: [
-              new TableCell({ children: [new Paragraph(proy.mes)] }),
-              new TableCell({ children: [new Paragraph(`${proy.madurezEsperada}%`)] }),
-              new TableCell({ children: [new Paragraph(proy.capacidadesImplementadas.join(', '))] }),
-              new TableCell({ children: [new Paragraph(
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: proy.mes, font: 'Aptos', size: 11 })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: `${proy.madurezEsperada}%`, font: 'Aptos', size: 11 })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: proy.capacidadesImplementadas.join(', '), font: 'Aptos', size: 11 })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 
                 `Lead Time: ${proy.kpisEsperados.leadTime}, ` +
                 `Deployment Frequency: ${proy.kpisEsperados.deploymentFrequency}, ` +
-                `Change Failure Rate: ${proy.kpisEsperados.changeFailureRate}`
-              )] }),
+                `Change Failure Rate: ${proy.kpisEsperados.changeFailureRate}`, font: 'Aptos', size: 11 })] })] }),
             ],
           })
         ),
@@ -493,8 +658,21 @@ export class WordExporterService {
     elements.push(table);
 
     // Insertar gráfico de evolución
-  elements.push(new Paragraph({ text: 'Gráfico de Evolución Esperada', heading: HeadingLevel.HEADING_2 }));
-  elements.push(new Paragraph({ children: [ new ImageRun({ data: evolutionBuffer, transformation: { width: 500, height: 350 }, type: 'image/png' } as any) ] }));
+    elements.push(new Paragraph({
+      children: [
+        new TextRun({
+          text: 'Gráfico de Evolución Esperada',
+          font: 'Aptos',
+          size: 16,
+        }),
+      ],
+      heading: HeadingLevel.HEADING_2,
+      spacing: { after: 200, before: 400 },
+    }));
+    elements.push(new Paragraph({
+      children: [ new ImageRun({ data: evolutionBuffer, transformation: { width: 500, height: 350 }, type: 'image/png' } as any) ],
+      spacing: { after: 400 },
+    }));
 
     return elements;
   }
@@ -617,8 +795,15 @@ export class WordExporterService {
   private createRoadmap(data: DevOpsAnalysis): (Paragraph | Table)[] {
     const elements: (Paragraph | Table)[] = [
       new Paragraph({
-        text: 'Roadmap',
+        children: [
+          new TextRun({
+            text: 'Roadmap',
+            font: 'Aptos',
+            size: 24,
+          }),
+        ],
         heading: HeadingLevel.HEADING_1,
+        spacing: { after: 300 },
       }),
     ];
 
@@ -630,17 +815,17 @@ export class WordExporterService {
       rows: [
         new TableRow({
           children: [
-            new TableCell({ children: [new Paragraph('Mes')] }),
-            new TableCell({ children: [new Paragraph('Entregables')] }),
-            new TableCell({ children: [new Paragraph('Objetivos')] }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Mes', font: 'Aptos', size: 11 })] })] }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Entregables', font: 'Aptos', size: 11 })] })] }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Objetivos', font: 'Aptos', size: 11 })] })] }),
           ],
         }),
         ...data.roadmap.map(item =>
           new TableRow({
             children: [
-              new TableCell({ children: [new Paragraph(item.mes)] }),
-              new TableCell({ children: [new Paragraph(item.entregables.join(', '))] }),
-              new TableCell({ children: [new Paragraph(item.objetivos.join(', '))] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: item.mes, font: 'Aptos', size: 11 })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: item.entregables.join(', '), font: 'Aptos', size: 11 })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: item.objetivos.join(', '), font: 'Aptos', size: 11 })] })] }),
             ],
           })
         ),
@@ -654,8 +839,15 @@ export class WordExporterService {
   private createAzureServicesTable(): (Paragraph | Table)[] {
     const elements: (Paragraph | Table)[] = [
       new Paragraph({
-        text: 'Tabla de Servicios Azure Recomendados',
+        children: [
+          new TextRun({
+            text: 'Tabla de Servicios Azure Recomendados',
+            font: 'Aptos',
+            size: 24,
+          }),
+        ],
         heading: HeadingLevel.HEADING_1,
+        spacing: { after: 300 },
       }),
     ];
 
@@ -684,19 +876,19 @@ export class WordExporterService {
       rows: [
         new TableRow({
           children: [
-            new TableCell({ children: [new Paragraph('Área evaluada relacionada')] }),
-            new TableCell({ children: [new Paragraph('Servicio')] }),
-            new TableCell({ children: [new Paragraph('Descripción detallada')] }),
-            new TableCell({ children: [new Paragraph('Modelo de costos')] }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Área evaluada relacionada', font: 'Aptos', size: 11 })] })] }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Servicio', font: 'Aptos', size: 11 })] })] }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Descripción detallada', font: 'Aptos', size: 11 })] })] }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Modelo de costos', font: 'Aptos', size: 11 })] })] }),
           ],
         }),
         ...services.map(service =>
           new TableRow({
             children: [
-              new TableCell({ children: [new Paragraph(service[0])] }),
-              new TableCell({ children: [new Paragraph(service[1])] }),
-              new TableCell({ children: [new Paragraph(service[2])] }),
-              new TableCell({ children: [new Paragraph(service[3])] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: service[0], font: 'Aptos', size: 11 })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: service[1], font: 'Aptos', size: 11 })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: service[2], font: 'Aptos', size: 11 })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: service[3], font: 'Aptos', size: 11 })] })] }),
             ],
           })
         ),
@@ -710,14 +902,28 @@ export class WordExporterService {
   private createConclusion(): Paragraph[] {
     return [
       new Paragraph({
-        text: 'Conclusión General del Estudio',
+        children: [
+          new TextRun({
+            text: 'Conclusión General del Estudio',
+            font: 'Aptos',
+            size: 24,
+          }),
+        ],
         heading: HeadingLevel.HEADING_1,
+        spacing: { after: 300 },
       }),
-      new Paragraph(
-        'El estado actual muestra una madurez gestionada con oportunidades claras en seguridad, automatización, observabilidad y gobernanza. ' +
-        'La hoja de ruta propuesta, basada en Azure Well-Architected Framework y buenas prácticas CMMI, proyecta alcanzar un 65–70% de madurez en el corto plazo, ' +
-        'mejorando resiliencia, velocidad de entrega y postura de seguridad, con beneficios tangibles en continuidad operativa y control de costos.'
-      ),
+      new Paragraph({
+        children: [
+          new TextRun({
+            text: 'El estado actual muestra una madurez gestionada con oportunidades claras en seguridad, automatización, observabilidad y gobernanza. ' +
+            'La hoja de ruta propuesta, basada en Azure Well-Architected Framework y buenas prácticas CMMI, proyecta alcanzar un 65–70% de madurez en el corto plazo, ' +
+            'mejorando resiliencia, velocidad de entrega y postura de seguridad, con beneficios tangibles en continuidad operativa y control de costos.',
+            font: 'Aptos',
+            size: 11,
+          }),
+        ],
+        spacing: { after: 400 },
+      }),
     ];
   }
 }
