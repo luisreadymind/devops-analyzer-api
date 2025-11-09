@@ -650,7 +650,7 @@ export class WordExporterService {
       rows: [
         new TableRow({
           children: [
-            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Mes', font: 'Aptos', size: 22 })] })] }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Mes', font: 'Aptos', size: 22, bold: true })] })] }),
             new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Entregables', font: 'Aptos', size: 22 })] })] }),
             new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Objetivos', font: 'Aptos', size: 22 })] })] }),
           ],
@@ -658,7 +658,7 @@ export class WordExporterService {
         ...data.roadmap.map(item =>
           new TableRow({
             children: [
-              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: item.mes, font: 'Aptos', size: 22 })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: item.mes, font: 'Aptos', size: 22, bold: true })] })] }),
               new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: item.entregables.join(', '), font: 'Aptos', size: 22 })] })] }),
               new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: item.objetivos.join(', '), font: 'Aptos', size: 22 })] })] }),
             ],
