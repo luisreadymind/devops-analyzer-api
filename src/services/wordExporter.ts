@@ -452,7 +452,7 @@ export class WordExporterService {
       rows: [
         new TableRow({
           children: [
-            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'ID', font: 'Aptos', size: 22, bold: true })] })] }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'ID', font: 'Aptos', size: 22, bold: true, color: '000000' })] })] }),
             new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Descripción', font: 'Aptos', size: 22 })] })] }),
             new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Servicio Azure', font: 'Aptos', size: 22 })] })] }),
             new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Prioridad', font: 'Aptos', size: 22 })] })] }),
@@ -462,7 +462,7 @@ export class WordExporterService {
         ...data.recomendaciones.map(rec =>
           new TableRow({
             children: [
-              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: rec.id, font: 'Aptos', size: 22, bold: true })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: rec.id !== undefined && rec.id !== null ? String(rec.id) : '', font: 'Aptos', size: 22, bold: true, color: '000000' })] })] }),
               new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: rec.descripcion, font: 'Aptos', size: 22 })] })] }),
               new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: rec.servicioAzure, font: 'Aptos', size: 22 })] })] }),
               new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: rec.prioridad, font: 'Aptos', size: 22 })] })] }),
@@ -587,7 +587,7 @@ export class WordExporterService {
       rows: [
         new TableRow({
           children: [
-            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Mes', font: 'Aptos', size: 22 })] })] }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Mes', font: 'Aptos', size: 22, color: '000000' })] })] }),
             new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Madurez Esperada', font: 'Aptos', size: 22 })] })] }),
             new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Capacidades Implementadas', font: 'Aptos', size: 22 })] })] }),
             new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'KPIs Esperados', font: 'Aptos', size: 22 })] })] }),
@@ -596,7 +596,7 @@ export class WordExporterService {
         ...data.proyeccionEvolucion.map(proy =>
           new TableRow({
             children: [
-              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: proy.mes, font: 'Aptos', size: 22 })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: proy.mes !== undefined && proy.mes !== null ? String(proy.mes) : '', font: 'Aptos', size: 22, color: '000000' })] })] }),
               new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: `${proy.madurezEsperada}%`, font: 'Aptos', size: 22 })] })] }),
               new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: proy.capacidadesImplementadas.join(', '), font: 'Aptos', size: 22 })] })] }),
               new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 
