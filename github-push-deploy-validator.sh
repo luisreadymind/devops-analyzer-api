@@ -85,17 +85,32 @@ check_prerequisites() {
     fi
     
     # Add SSH key if not loaded
-    if ! ssh-add -l >/dev/null 2>&1; then
+    log_info "Verificando si SSH key está cargada..."
+    if ssh-add -l >/dev/null 2>&1; then
+        log_info "SSH key ya está cargada"
+    else
         log_info "Cargando SSH key..."
-        ssh-add ~/.ssh/id_rsa >/dev/null 2>&1 || ssh-add ~/.ssh/id_ed25519 >/dev/null 2>&1
+        if ssh-add ~/.ssh/id_rsa >/dev/null 2>&1; then
+            log_info "SSH key cargada exitosamente"
+        elif ssh-add ~/.ssh/id_ed25519 >/dev/null 2>&1; then
+            log_info "SSH key ed25519 cargada exitosamente"
+        else
+            log_info "Error al cargar SSH key"
+        fi
     fi
     
     # Test SSH connection
-    if ssh -T git@github.com >/dev/null 2>&1; then
+    log_info "Probando conexión SSH a GitHub..."
+    ssh_output=$(ssh -T git@github.com 2>&1)
+    ssh_exit=$?
+    log_info "SSH exit code: $ssh_exit"
+    log_info "SSH output: $ssh_output"
+    
+    if [ $ssh_exit -eq 0 ] && echo "$ssh_output" | grep -q "successfully authenticated"; then
         log_info "SSH authentication to GitHub verified ✓"
         auth_ok=true
     else
-        log_info "SSH authentication failed"
+        log_info "SSH authentication failed (exit: $ssh_exit)"
     fi
     
     # If SSH not working, check GitHub CLI
