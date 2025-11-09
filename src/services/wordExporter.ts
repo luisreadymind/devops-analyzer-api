@@ -1,7 +1,4 @@
-private createWorkPlan(data: DevOpsAnalysis): (Paragraph | Table)[] {
-private createEvolutionProjection(data: DevOpsAnalysis): (Paragraph | Table)[] {
 import { Document, Packer, Paragraph, Table, TableCell, TableRow, WidthType, AlignmentType, HeadingLevel, TextRun } from 'docx';
-import { ChartJSNodeCanvas } from 'chartjs-node-canvas';
 
 // Interfaces para el análisis DevOps
 interface PilarWAF {
@@ -90,25 +87,6 @@ interface DevOpsAnalysis {
 // const GREEN_RGB = { r: 81, g: 255, b: 120 }; // #51FF78
 
 export class WordExporterService {
-  private chartJS: ChartJSNodeCanvas;
-
-  constructor() {
-    this.chartJS = new ChartJSNodeCanvas({
-      width: 1200,
-      height: 800,
-      chartCallback: (ChartJS) => {
-        ChartJS.defaults.responsive = true;
-        ChartJS.defaults.maintainAspectRatio = false;
-        // Increase devicePixelRatio for higher resolution charts embedded in Word
-        ChartJS.defaults.devicePixelRatio = 3;
-
-        // Improve default font and colors for better visibility when exported
-        ChartJS.defaults.font.family = 'Arial';
-        ChartJS.defaults.font.size = 12;
-        ChartJS.defaults.color = '#222222';
-      }
-    });
-  }
 
   /**
    * Genera un documento Word con el reporte completo de madurez DevOps
