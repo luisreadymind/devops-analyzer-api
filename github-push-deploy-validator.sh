@@ -101,16 +101,11 @@ check_prerequisites() {
     
     # Test SSH connection
     log_info "Probando conexión SSH a GitHub..."
-    ssh_output=$(ssh -T git@github.com 2>&1)
-    ssh_exit=$?
-    log_info "SSH exit code: $ssh_exit"
-    log_info "SSH output: $ssh_output"
-    
-    if [ $ssh_exit -eq 0 ] && echo "$ssh_output" | grep -q "successfully authenticated"; then
+    if ssh -T git@github.com 2>/dev/null | grep -q "successfully authenticated"; then
         log_info "SSH authentication to GitHub verified ✓"
         auth_ok=true
     else
-        log_info "SSH authentication failed (exit: $ssh_exit)"
+        log_info "SSH authentication failed"
     fi
     
     # If SSH not working, check GitHub CLI
