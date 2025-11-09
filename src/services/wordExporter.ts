@@ -97,7 +97,13 @@ export class WordExporterService {
       chartCallback: (ChartJS) => {
         ChartJS.defaults.responsive = true;
         ChartJS.defaults.maintainAspectRatio = false;
-        ChartJS.defaults.devicePixelRatio = 2;
+        // Increase devicePixelRatio for higher resolution charts embedded in Word
+        ChartJS.defaults.devicePixelRatio = 3;
+
+        // Improve default font and colors for better visibility when exported
+        ChartJS.defaults.font.family = 'Arial';
+        ChartJS.defaults.font.size = 12;
+        ChartJS.defaults.color = '#222222';
       }
     });
   }
@@ -137,35 +143,35 @@ export class WordExporterService {
             id: 'normal',
             name: 'Normal',
             run: {
-              font: 'Calibri',
-              size: 24, // 12pt
+              font: 'Aptos',
+              size: 22, // 11pt
             },
           },
           {
             id: 'title',
             name: 'Title',
             run: {
-              font: 'Calibri',
-              size: 56, // 28pt
-              color: '0078D4',
+              font: 'Aptos',
+              size: 48, // 24pt
+              color: '007D6D',
             },
           },
           {
             id: 'heading1',
             name: 'Heading 1',
             run: {
-              font: 'Calibri',
-              size: 40, // 20pt
-              color: '0078D4',
+              font: 'Aptos',
+              size: 48, // 24pt
+              color: '007D6D',
             },
           },
           {
             id: 'heading2',
             name: 'Heading 2',
             run: {
-              font: 'Calibri',
-              size: 28, // 14pt
-              color: '0078D4',
+              font: 'Aptos',
+              size: 32, // 16pt
+              color: 'EE0000',
             },
           },
         ],
@@ -185,7 +191,7 @@ export class WordExporterService {
           new TextRun({
             text: 'REPORTE DE MADUREZ DEVOPS',
             font: 'Aptos',
-            size: 24,
+            size: 48,
           }),
         ],
         heading: HeadingLevel.TITLE,
@@ -197,7 +203,7 @@ export class WordExporterService {
           new TextRun({
             text: 'Readymind México – Evaluación basada en Azure Well-Architected Framework y CMMI',
             font: 'Aptos',
-            size: 16,
+            size: 32,
           }),
         ],
         heading: HeadingLevel.HEADING_2,
@@ -209,7 +215,7 @@ export class WordExporterService {
           new TextRun({
             text: `Cliente: ${data.cliente}`,
             font: 'Aptos',
-            size: 14,
+            size: 22,
           }),
         ],
         heading: HeadingLevel.HEADING_3,
@@ -226,7 +232,7 @@ export class WordExporterService {
           new TextRun({
             text: 'Información General',
             font: 'Aptos',
-            size: 24,
+            size: 48,
           }),
         ],
         heading: HeadingLevel.HEADING_1,
@@ -234,22 +240,22 @@ export class WordExporterService {
       }),
       new Paragraph({
         children: [
-          new TextRun({ text: 'Cliente: ', bold: true, font: 'Aptos', size: 11 }),
-          new TextRun({ text: data.cliente, font: 'Aptos', size: 11 }),
+          new TextRun({ text: 'Cliente: ', bold: true, font: 'Aptos', size: 22 }),
+          new TextRun({ text: data.cliente, font: 'Aptos', size: 22 }),
         ],
         spacing: { after: 200 },
       }),
       new Paragraph({
         children: [
-          new TextRun({ text: 'Evaluador: ', bold: true, font: 'Aptos', size: 11 }),
-          new TextRun({ text: data.evaluador || 'Equipo Readymind', font: 'Aptos', size: 11 }),
+          new TextRun({ text: 'Evaluador: ', bold: true, font: 'Aptos', size: 22 }),
+          new TextRun({ text: data.evaluador || 'Equipo Readymind', font: 'Aptos', size: 22 }),
         ],
         spacing: { after: 200 },
       }),
       new Paragraph({
         children: [
-          new TextRun({ text: 'Fecha Assessment: ', bold: true, font: 'Aptos', size: 11 }),
-          new TextRun({ text: data.fechaAssessment, font: 'Aptos', size: 11 }),
+          new TextRun({ text: 'Fecha Assessment: ', bold: true, font: 'Aptos', size: 22 }),
+          new TextRun({ text: data.fechaAssessment, font: 'Aptos', size: 22 }),
         ],
         spacing: { after: 400 },
       }),
@@ -264,7 +270,7 @@ export class WordExporterService {
           new TextRun({
             text: 'Resumen Ejecutivo',
             font: 'Aptos',
-            size: 24,
+            size: 48,
           }),
         ],
         heading: HeadingLevel.HEADING_1,
@@ -275,7 +281,7 @@ export class WordExporterService {
           new TextRun({
             text: 'Diagnóstico general',
             font: 'Aptos',
-            size: 16,
+            size: 32,
           }),
         ],
         heading: HeadingLevel.HEADING_2,
@@ -286,7 +292,7 @@ export class WordExporterService {
           new TextRun({
             text: resumen.diagnostico,
             font: 'Aptos',
-            size: 11,
+            size: 22,
           }),
         ],
         spacing: { after: 300 },
@@ -296,7 +302,7 @@ export class WordExporterService {
           new TextRun({
             text: 'Hallazgos principales',
             font: 'Aptos',
-            size: 16,
+            size: 32,
           }),
         ],
         heading: HeadingLevel.HEADING_2,
@@ -311,7 +317,7 @@ export class WordExporterService {
           new TextRun({
             text: `• ${h}`,
             font: 'Aptos',
-            size: 11,
+            size: 22,
           }),
         ],
         bullet: { level: 0 },
@@ -325,7 +331,7 @@ export class WordExporterService {
           new TextRun({
             text: 'Impacto en el negocio',
             font: 'Aptos',
-            size: 16,
+            size: 32,
           }),
         ],
         heading: HeadingLevel.HEADING_2,
@@ -336,7 +342,7 @@ export class WordExporterService {
           new TextRun({
             text: resumen.impactoNegocio,
             font: 'Aptos',
-            size: 11,
+            size: 22,
           }),
         ],
         spacing: { after: 400 },
@@ -354,7 +360,7 @@ export class WordExporterService {
           new TextRun({
             text: 'Resultado Global',
             font: 'Aptos',
-            size: 24,
+            size: 48,
           }),
         ],
         heading: HeadingLevel.HEADING_1,
@@ -362,29 +368,29 @@ export class WordExporterService {
       }),
       new Paragraph({
         children: [
-          new TextRun({ text: 'Puntuación total: ', bold: true, font: 'Aptos', size: 11 }),
-          new TextRun({ text: resultado.puntuacionTotal.toString(), font: 'Aptos', size: 11 }),
+          new TextRun({ text: 'Puntuación total: ', bold: true, font: 'Aptos', size: 22 }),
+          new TextRun({ text: resultado.puntuacionTotal.toString(), font: 'Aptos', size: 22 }),
         ],
         spacing: { after: 200 },
       }),
       new Paragraph({
         children: [
-          new TextRun({ text: 'Nivel predominante: ', bold: true, font: 'Aptos', size: 11 }),
-          new TextRun({ text: resultado.nivelPredominante, font: 'Aptos', size: 11 }),
+          new TextRun({ text: 'Nivel predominante: ', bold: true, font: 'Aptos', size: 22 }),
+          new TextRun({ text: resultado.nivelPredominante, font: 'Aptos', size: 22 }),
         ],
         spacing: { after: 200 },
       }),
       new Paragraph({
         children: [
-          new TextRun({ text: 'Áreas críticas: ', bold: true, font: 'Aptos', size: 11 }),
-          new TextRun({ text: resultado.areasCriticas.join(', '), font: 'Aptos', size: 11 }),
+          new TextRun({ text: 'Áreas críticas: ', bold: true, font: 'Aptos', size: 22 }),
+          new TextRun({ text: resultado.areasCriticas.join(', '), font: 'Aptos', size: 22 }),
         ],
         spacing: { after: 200 },
       }),
       new Paragraph({
         children: [
-          new TextRun({ text: 'Áreas fuertes: ', bold: true, font: 'Aptos', size: 11 }),
-          new TextRun({ text: resultado.areasFuertes.join(', '), font: 'Aptos', size: 11 }),
+          new TextRun({ text: 'Áreas fuertes: ', bold: true, font: 'Aptos', size: 22 }),
+          new TextRun({ text: resultado.areasFuertes.join(', '), font: 'Aptos', size: 22 }),
         ],
         spacing: { after: 400 },
       }),
@@ -398,7 +404,7 @@ export class WordExporterService {
           new TextRun({
             text: 'Evaluación por Pilar WAF',
             font: 'Aptos',
-            size: 24,
+            size: 48,
           }),
         ],
         heading: HeadingLevel.HEADING_1,
@@ -415,17 +421,17 @@ export class WordExporterService {
       rows: [
         new TableRow({
           children: [
-            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Pilar', font: 'Aptos', size: 11 })] })] }),
-            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Puntaje', font: 'Aptos', size: 11 })] })] }),
-            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Observaciones', font: 'Aptos', size: 11 })] })] }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Pilar', font: 'Aptos', size: 22 })] })] }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Puntaje', font: 'Aptos', size: 22 })] })] }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Observaciones', font: 'Aptos', size: 22 })] })] }),
           ],
         }),
         ...data.capacidadWAF.map(pilar =>
           new TableRow({
             children: [
-              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: pilar.pilar, font: 'Aptos', size: 11 })] })] }),
-              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: pilar.puntaje.toString(), font: 'Aptos', size: 11 })] })] }),
-              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: pilar.observaciones, font: 'Aptos', size: 11 })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: pilar.pilar, font: 'Aptos', size: 22 })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: pilar.puntaje.toString(), font: 'Aptos', size: 22 })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: pilar.observaciones, font: 'Aptos', size: 22 })] })] }),
             ],
           })
         ),
@@ -440,7 +446,7 @@ export class WordExporterService {
         new TextRun({
           text: 'Gráfico Radar: Situación Actual vs. Esperada',
           font: 'Aptos',
-          size: 16,
+          size: 32,
         }),
       ],
       heading: HeadingLevel.HEADING_2,
@@ -457,7 +463,7 @@ export class WordExporterService {
         new TextRun({
           text: 'Gráfico de Barras: Resultados por Calificación',
           font: 'Aptos',
-          size: 16,
+          size: 32,
         }),
       ],
       heading: HeadingLevel.HEADING_2,
@@ -478,7 +484,7 @@ export class WordExporterService {
           new TextRun({
             text: 'Recomendaciones',
             font: 'Aptos',
-            size: 24,
+            size: 48,
           }),
         ],
         heading: HeadingLevel.HEADING_1,
@@ -494,21 +500,21 @@ export class WordExporterService {
       rows: [
         new TableRow({
           children: [
-            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'ID', font: 'Aptos', size: 11 })] })] }),
-            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Descripción', font: 'Aptos', size: 11 })] })] }),
-            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Servicio Azure', font: 'Aptos', size: 11 })] })] }),
-            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Prioridad', font: 'Aptos', size: 11 })] })] }),
-            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Impacto Esperado', font: 'Aptos', size: 11 })] })] }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'ID', font: 'Aptos', size: 22 })] })] }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Descripción', font: 'Aptos', size: 22 })] })] }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Servicio Azure', font: 'Aptos', size: 22 })] })] }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Prioridad', font: 'Aptos', size: 22 })] })] }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Impacto Esperado', font: 'Aptos', size: 22 })] })] }),
           ],
         }),
         ...data.recomendaciones.map(rec =>
           new TableRow({
             children: [
-              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: rec.id, font: 'Aptos', size: 11 })] })] }),
-              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: rec.descripcion, font: 'Aptos', size: 11 })] })] }),
-              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: rec.servicioAzure, font: 'Aptos', size: 11 })] })] }),
-              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: rec.prioridad, font: 'Aptos', size: 11 })] })] }),
-              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: rec.impactoEsperado, font: 'Aptos', size: 11 })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: rec.id, font: 'Aptos', size: 22 })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: rec.descripcion, font: 'Aptos', size: 22 })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: rec.servicioAzure, font: 'Aptos', size: 22 })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: rec.prioridad, font: 'Aptos', size: 22 })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: rec.impactoEsperado, font: 'Aptos', size: 22 })] })] }),
             ],
           })
         ),
@@ -527,7 +533,7 @@ export class WordExporterService {
           new TextRun({
             text: 'Plan de Trabajo',
             font: 'Aptos',
-            size: 24,
+            size: 48,
           }),
         ],
         heading: HeadingLevel.HEADING_1,
@@ -535,22 +541,22 @@ export class WordExporterService {
       }),
       new Paragraph({
         children: [
-          new TextRun({ text: 'Horas máximas: ', bold: true, font: 'Aptos', size: 11 }),
-          new TextRun({ text: plan.horasMaximas.toString(), font: 'Aptos', size: 11 }),
+          new TextRun({ text: 'Horas máximas: ', bold: true, font: 'Aptos', size: 22 }),
+          new TextRun({ text: plan.horasMaximas.toString(), font: 'Aptos', size: 22 }),
         ],
         spacing: { after: 200 },
       }),
       new Paragraph({
         children: [
-          new TextRun({ text: 'Periodo: ', bold: true, font: 'Aptos', size: 11 }),
-          new TextRun({ text: `${plan.periodoMaximoMeses} meses`, font: 'Aptos', size: 11 }),
+          new TextRun({ text: 'Periodo: ', bold: true, font: 'Aptos', size: 22 }),
+          new TextRun({ text: `${plan.periodoMaximoMeses} meses`, font: 'Aptos', size: 22 }),
         ],
         spacing: { after: 200 },
       }),
       new Paragraph({
         children: [
-          new TextRun({ text: 'Horas semanales por recurso: ', bold: true, font: 'Aptos', size: 11 }),
-          new TextRun({ text: plan.horasSemanalesPorRecurso.toString(), font: 'Aptos', size: 11 }),
+          new TextRun({ text: 'Horas semanales por recurso: ', bold: true, font: 'Aptos', size: 22 }),
+          new TextRun({ text: plan.horasSemanalesPorRecurso.toString(), font: 'Aptos', size: 22 }),
         ],
         spacing: { after: 300 },
       }),
@@ -565,23 +571,23 @@ export class WordExporterService {
       rows: [
         new TableRow({
           children: [
-            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'ID', font: 'Aptos', size: 11 })] })] }),
-            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Descripción', font: 'Aptos', size: 11 })] })] }),
-            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Horas', font: 'Aptos', size: 11 })] })] }),
-            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Dependencia', font: 'Aptos', size: 11 })] })] }),
-            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Rol', font: 'Aptos', size: 11 })] })] }),
-            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Fase', font: 'Aptos', size: 11 })] })] }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'ID', font: 'Aptos', size: 22 })] })] }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Descripción', font: 'Aptos', size: 22 })] })] }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Horas', font: 'Aptos', size: 22 })] })] }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Dependencia', font: 'Aptos', size: 22 })] })] }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Rol', font: 'Aptos', size: 22 })] })] }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Fase', font: 'Aptos', size: 22 })] })] }),
           ],
         }),
         ...plan.tareasDetalladas.map(tarea =>
           new TableRow({
             children: [
-              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: tarea.id_tarea, font: 'Aptos', size: 11 })] })] }),
-              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: tarea.descripcion, font: 'Aptos', size: 11 })] })] }),
-              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: tarea.horas_estimadas.toString(), font: 'Aptos', size: 11 })] })] }),
-              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: tarea.dependencia, font: 'Aptos', size: 11 })] })] }),
-              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: tarea.rol, font: 'Aptos', size: 11 })] })] }),
-              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: tarea.fase, font: 'Aptos', size: 11 })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: tarea.id_tarea, font: 'Aptos', size: 22 })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: tarea.descripcion, font: 'Aptos', size: 22 })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: tarea.horas_estimadas.toString(), font: 'Aptos', size: 22 })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: tarea.dependencia, font: 'Aptos', size: 22 })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: tarea.rol, font: 'Aptos', size: 22 })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: tarea.fase, font: 'Aptos', size: 22 })] })] }),
             ],
           })
         ),
@@ -596,7 +602,7 @@ export class WordExporterService {
         new TextRun({
           text: 'Gráfico de Pie: Total de Horas por Rol',
           font: 'Aptos',
-          size: 16,
+          size: 32,
         }),
       ],
       heading: HeadingLevel.HEADING_2,
@@ -617,7 +623,7 @@ export class WordExporterService {
           new TextRun({
             text: 'Proyección de Evolución',
             font: 'Aptos',
-            size: 24,
+            size: 48,
           }),
         ],
         heading: HeadingLevel.HEADING_1,
@@ -633,22 +639,22 @@ export class WordExporterService {
       rows: [
         new TableRow({
           children: [
-            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Mes', font: 'Aptos', size: 11 })] })] }),
-            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Madurez Esperada', font: 'Aptos', size: 11 })] })] }),
-            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Capacidades Implementadas', font: 'Aptos', size: 11 })] })] }),
-            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'KPIs Esperados', font: 'Aptos', size: 11 })] })] }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Mes', font: 'Aptos', size: 22 })] })] }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Madurez Esperada', font: 'Aptos', size: 22 })] })] }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Capacidades Implementadas', font: 'Aptos', size: 22 })] })] }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'KPIs Esperados', font: 'Aptos', size: 22 })] })] }),
           ],
         }),
         ...data.proyeccionEvolucion.map(proy =>
           new TableRow({
             children: [
-              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: proy.mes, font: 'Aptos', size: 11 })] })] }),
-              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: `${proy.madurezEsperada}%`, font: 'Aptos', size: 11 })] })] }),
-              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: proy.capacidadesImplementadas.join(', '), font: 'Aptos', size: 11 })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: proy.mes, font: 'Aptos', size: 22 })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: `${proy.madurezEsperada}%`, font: 'Aptos', size: 22 })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: proy.capacidadesImplementadas.join(', '), font: 'Aptos', size: 22 })] })] }),
               new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 
                 `Lead Time: ${proy.kpisEsperados.leadTime}, ` +
                 `Deployment Frequency: ${proy.kpisEsperados.deploymentFrequency}, ` +
-                `Change Failure Rate: ${proy.kpisEsperados.changeFailureRate}`, font: 'Aptos', size: 11 })] })] }),
+                `Change Failure Rate: ${proy.kpisEsperados.changeFailureRate}`, font: 'Aptos', size: 22 })] })] }),
             ],
           })
         ),
@@ -663,7 +669,7 @@ export class WordExporterService {
         new TextRun({
           text: 'Gráfico de Evolución Esperada',
           font: 'Aptos',
-          size: 16,
+          size: 32,
         }),
       ],
       heading: HeadingLevel.HEADING_2,
@@ -692,20 +698,29 @@ export class WordExporterService {
           {
             label: 'Actual',
             data: actual,
-            backgroundColor: 'rgba(0,120,212,0.2)',
+            backgroundColor: 'rgba(0,120,212,0.25)',
             borderColor: 'rgba(0,120,212,1)',
+            borderWidth: 2,
+            pointRadius: 4,
+            pointBackgroundColor: 'rgba(0,120,212,1)',
           },
           {
             label: 'Esperada',
             data: expected,
-            backgroundColor: 'rgba(127,63,191,0.2)',
+            backgroundColor: 'rgba(127,63,191,0.25)',
             borderColor: 'rgba(127,63,191,1)',
+            borderWidth: 2,
+            pointRadius: 4,
+            pointBackgroundColor: 'rgba(127,63,191,1)',
           },
         ],
       },
       options: {
-        plugins: { legend: { position: 'top' } },
-        scales: { r: { min: 0, max: 100 } },
+        plugins: {
+          legend: { position: 'top', labels: { color: '#222222', font: { size: 14 } } },
+          title: { display: false }
+        },
+        scales: { r: { min: 0, max: 100, ticks: { color: '#222222', font: { size: 12 } }, pointLabels: { color: '#222222', font: { size: 12 } } } },
       },
     };
     return await this.chartJS.renderToBuffer(config);
@@ -723,13 +738,18 @@ export class WordExporterService {
           {
             label: 'Puntaje',
             data: scores,
-            backgroundColor: 'rgba(0,120,212,0.7)',
+            backgroundColor: 'rgba(0,120,212,0.85)',
+            borderColor: 'rgba(0,120,212,1)',
+            borderWidth: 1,
           },
         ],
       },
       options: {
-        plugins: { legend: { display: false } },
-        scales: { y: { min: 0, max: 100 } },
+        plugins: { legend: { display: false }, title: { display: false } },
+        scales: {
+          x: { ticks: { color: '#222222', font: { size: 12 } } },
+          y: { min: 0, max: 100, ticks: { color: '#222222', font: { size: 12 } } }
+        },
       },
     };
     return await this.chartJS.renderToBuffer(config);
@@ -748,15 +768,15 @@ export class WordExporterService {
             label: 'Madurez Esperada (%)',
             data: madurez,
             fill: false,
-            borderColor: 'rgba(81,255,120,1)',
-            backgroundColor: 'rgba(81,255,120,0.2)',
+            borderColor: 'rgba(0,180,120,1)',
+            backgroundColor: 'rgba(0,180,120,0.25)',
             tension: 0.3,
           },
         ],
       },
       options: {
-        plugins: { legend: { position: 'top' } },
-        scales: { y: { min: 0, max: 100 } },
+        plugins: { legend: { position: 'top', labels: { color: '#222222', font: { size: 13 } } } },
+        scales: { y: { min: 0, max: 100, ticks: { color: '#222222', font: { size: 12 } } }, x: { ticks: { color: '#222222', font: { size: 12 } } } },
       },
     };
     return await this.chartJS.renderToBuffer(config);
@@ -766,6 +786,16 @@ export class WordExporterService {
     // Pie: total de horas por rol
     const roles = data.planTrabajo.resumenRoles.map(r => r.rol);
     const horas = data.planTrabajo.resumenRoles.map(r => r.horas);
+    // Azure palette (hex) converted to rgba for pie slices
+    const AZURE_PALETTE = [
+      'rgba(0,120,212,0.9)', // #0078D4
+      'rgba(0,125,109,0.9)', // #007D6D (titles color)
+      'rgba(127,63,191,0.9)', // #7F3FBF
+      'rgba(0,180,120,0.9)', // green variant
+      'rgba(255,185,0,0.9)', // yellow accent
+      'rgba(0,164,239,0.9)', // light azure
+    ];
+
     const config: import('chart.js').ChartConfiguration<'pie', number[], string> = {
       type: 'pie',
       data: {
@@ -774,19 +804,14 @@ export class WordExporterService {
           {
             label: 'Horas por Rol',
             data: horas,
-            backgroundColor: [
-              'rgba(0,120,212,0.7)',
-              'rgba(127,63,191,0.7)',
-              'rgba(81,255,120,0.7)',
-              'rgba(255,205,86,0.7)',
-              'rgba(255,99,132,0.7)',
-              'rgba(54,162,235,0.7)',
-            ],
+            backgroundColor: AZURE_PALETTE.slice(0, Math.max(roles.length, 1)),
+            borderColor: '#ffffff',
+            borderWidth: 1,
           },
         ],
       },
       options: {
-        plugins: { legend: { position: 'right' } },
+        plugins: { legend: { position: 'right', labels: { color: '#222222', font: { size: 12 } } } },
       },
     };
     return await this.chartJS.renderToBuffer(config);
@@ -815,17 +840,17 @@ export class WordExporterService {
       rows: [
         new TableRow({
           children: [
-            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Mes', font: 'Aptos', size: 11 })] })] }),
-            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Entregables', font: 'Aptos', size: 11 })] })] }),
-            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Objetivos', font: 'Aptos', size: 11 })] })] }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Mes', font: 'Aptos', size: 22 })] })] }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Entregables', font: 'Aptos', size: 22 })] })] }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Objetivos', font: 'Aptos', size: 22 })] })] }),
           ],
         }),
         ...data.roadmap.map(item =>
           new TableRow({
             children: [
-              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: item.mes, font: 'Aptos', size: 11 })] })] }),
-              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: item.entregables.join(', '), font: 'Aptos', size: 11 })] })] }),
-              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: item.objetivos.join(', '), font: 'Aptos', size: 11 })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: item.mes, font: 'Aptos', size: 22 })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: item.entregables.join(', '), font: 'Aptos', size: 22 })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: item.objetivos.join(', '), font: 'Aptos', size: 22 })] })] }),
             ],
           })
         ),
@@ -876,19 +901,19 @@ export class WordExporterService {
       rows: [
         new TableRow({
           children: [
-            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Área evaluada relacionada', font: 'Aptos', size: 11 })] })] }),
-            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Servicio', font: 'Aptos', size: 11 })] })] }),
-            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Descripción detallada', font: 'Aptos', size: 11 })] })] }),
-            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Modelo de costos', font: 'Aptos', size: 11 })] })] }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Área evaluada relacionada', font: 'Aptos', size: 22 })] })] }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Servicio', font: 'Aptos', size: 22 })] })] }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Descripción detallada', font: 'Aptos', size: 22 })] })] }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Modelo de costos', font: 'Aptos', size: 22 })] })] }),
           ],
         }),
         ...services.map(service =>
           new TableRow({
             children: [
-              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: service[0], font: 'Aptos', size: 11 })] })] }),
-              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: service[1], font: 'Aptos', size: 11 })] })] }),
-              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: service[2], font: 'Aptos', size: 11 })] })] }),
-              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: service[3], font: 'Aptos', size: 11 })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: service[0], font: 'Aptos', size: 22 })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: service[1], font: 'Aptos', size: 22 })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: service[2], font: 'Aptos', size: 22 })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: service[3], font: 'Aptos', size: 22 })] })] }),
             ],
           })
         ),
@@ -919,7 +944,7 @@ export class WordExporterService {
             'La hoja de ruta propuesta, basada en Azure Well-Architected Framework y buenas prácticas CMMI, proyecta alcanzar un 65–70% de madurez en el corto plazo, ' +
             'mejorando resiliencia, velocidad de entrega y postura de seguridad, con beneficios tangibles en continuidad operativa y control de costos.',
             font: 'Aptos',
-            size: 11,
+            size: 22,
           }),
         ],
         spacing: { after: 400 },
