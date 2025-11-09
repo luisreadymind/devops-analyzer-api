@@ -27,7 +27,7 @@ AZURE_RG="DevOpsAssesment"
 AZURE_URL="https://devops-analyzer-api.azurewebsites.net"
 REGISTRY="ghcr.io"
 IMAGE_NAME="$REGISTRY/$REPO_OWNER/devops-analyzer-api"
-MAX_WAIT_ACTIONS=200  # 200 segundos
+MAX_WAIT_ACTIONS=320  # 320 segundos
 POST_RESTART_WAIT=60  # 60 segundos
 BUILD_DATE=$(date '+%Y%m%d-%H%M%S')
 
