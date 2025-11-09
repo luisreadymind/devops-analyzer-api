@@ -1,4 +1,4 @@
-import { Document, Packer, Paragraph, Table, TableCell, TableRow, WidthType, AlignmentType, HeadingLevel, TextRun, ImageRun } from 'docx';
+import { Document, Packer, Paragraph, Table, TableCell, TableRow, WidthType, AlignmentType, HeadingLevel, TextRun } from 'docx';
 import { ChartJSNodeCanvas } from 'chartjs-node-canvas';
 
 // Interfaces para el análisis DevOps
@@ -397,7 +397,7 @@ export class WordExporterService {
     ];
   }
 
-  private createWAFEvaluation(data: DevOpsAnalysis, radarBuffer: Buffer, barBuffer: Buffer): (Paragraph | Table)[] {
+  private createWAFEvaluation(data: DevOpsAnalysis): (Paragraph | Table)[] {
     const elements: (Paragraph | Table)[] = [
       new Paragraph({
         children: [
@@ -409,6 +409,17 @@ export class WordExporterService {
         ],
         heading: HeadingLevel.HEADING_1,
         spacing: { after: 300 },
+      }),
+      new Paragraph({
+        children: [
+          new TextRun({
+            text: 'Situación Actual vs. Esperada',
+            font: 'Aptos',
+            size: 32,
+          }),
+        ],
+        heading: HeadingLevel.HEADING_2,
+        spacing: { after: 200 },
       }),
     ];
 
@@ -440,40 +451,6 @@ export class WordExporterService {
 
     elements.push(table);
 
-    // Insertar gráfico radar
-    elements.push(new Paragraph({
-      children: [
-        new TextRun({
-          text: 'Gráfico Radar: Situación Actual vs. Esperada',
-          font: 'Aptos',
-          size: 32,
-        }),
-      ],
-      heading: HeadingLevel.HEADING_2,
-      spacing: { after: 200, before: 400 },
-    }));
-    elements.push(new Paragraph({
-      children: [ new ImageRun({ data: radarBuffer, transformation: { width: 500, height: 350 }, type: 'image/png' } as any) ],
-      spacing: { after: 400 },
-    }));
-
-    // Insertar gráfico de barras
-    elements.push(new Paragraph({
-      children: [
-        new TextRun({
-          text: 'Gráfico de Barras: Resultados por Calificación',
-          font: 'Aptos',
-          size: 32,
-        }),
-      ],
-      heading: HeadingLevel.HEADING_2,
-      spacing: { after: 200, before: 200 },
-    }));
-    elements.push(new Paragraph({
-      children: [ new ImageRun({ data: barBuffer, transformation: { width: 500, height: 350 }, type: 'image/png' } as any) ],
-      spacing: { after: 400 },
-    }));
-
     return elements;
   }
 
@@ -500,7 +477,7 @@ export class WordExporterService {
       rows: [
         new TableRow({
           children: [
-            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'ID', font: 'Aptos', size: 22 })] })] }),
+            new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'ID', font: 'Aptos', size: 22, bold: true })] })] }),
             new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Descripción', font: 'Aptos', size: 22 })] })] }),
             new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Servicio Azure', font: 'Aptos', size: 22 })] })] }),
             new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Prioridad', font: 'Aptos', size: 22 })] })] }),
@@ -510,7 +487,7 @@ export class WordExporterService {
         ...data.recomendaciones.map(rec =>
           new TableRow({
             children: [
-              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: rec.id, font: 'Aptos', size: 22 })] })] }),
+              new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: rec.id, font: 'Aptos', size: 22, bold: true })] })] }),
               new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: rec.descripcion, font: 'Aptos', size: 22 })] })] }),
               new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: rec.servicioAzure, font: 'Aptos', size: 22 })] })] }),
               new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: rec.prioridad, font: 'Aptos', size: 22 })] })] }),
