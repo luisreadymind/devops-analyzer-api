@@ -59,9 +59,7 @@ check_prerequisites() {
     # Verificar herramientas necesarias
     local missing_tools=()
     if ! command -v git >/dev/null 2>&1; then missing_tools+=("git"); fi
-    # github-cli is optional if SSH keys are available for pushing
-    GH_CLI_AVAILABLE=true
-    if ! command -v gh >/dev/null 2>&1; then GH_CLI_AVAILABLE=false; fi
+    if ! command -v gh >/dev/null 2>&1; then missing_tools+=("github-cli"); fi
     if ! command -v az >/dev/null 2>&1; then missing_tools+=("azure-cli"); fi
     if ! command -v jq >/dev/null 2>&1; then missing_tools+=("jq"); fi
     if ! command -v curl >/dev/null 2>&1; then missing_tools+=("curl"); fi
@@ -72,53 +70,10 @@ check_prerequisites() {
         exit 1
     fi
     
-    # Verificar autenticación (SSH o GitHub CLI)
-    local auth_ok=false
-    
-    # Check SSH auth first - ensure agent is running
-    log_info "Verificando SSH authentication..."
-    
-    # Start SSH agent if not running
-    if [ -z "$SSH_AGENT_PID" ]; then
-        log_info "Iniciando SSH agent..."
-        eval "$(ssh-agent -s)" >/dev/null 2>&1
-    fi
-    
-    # Add SSH key if not loaded
-    log_info "Verificando si SSH key está cargada..."
-    if ssh-add -l >/dev/null 2>&1; then
-        log_info "SSH key ya está cargada"
-    else
-        log_info "Cargando SSH key..."
-        if ssh-add ~/.ssh/id_rsa >/dev/null 2>&1; then
-            log_info "SSH key cargada exitosamente"
-        elif ssh-add ~/.ssh/id_ed25519 >/dev/null 2>&1; then
-            log_info "SSH key ed25519 cargada exitosamente"
-        else
-            log_info "Error al cargar SSH key"
-        fi
-    fi
-    
-    # Test SSH connection
-    log_info "Probando conexión SSH a GitHub..."
-    if ssh -T git@github.com 2>/dev/null | grep -q "successfully authenticated"; then
-        log_info "SSH authentication to GitHub verified ✓"
-        auth_ok=true
-    else
-        log_info "SSH authentication failed"
-    fi
-    
-    # If SSH not working, check GitHub CLI
-    if [ "$auth_ok" = false ] && [ "$GH_CLI_AVAILABLE" = true ]; then
-        if gh auth status >/dev/null 2>&1; then
-            log_info "GitHub CLI authentication verified ✓"
-            auth_ok=true
-        fi
-    fi
-    
-    if [ "$auth_ok" = false ]; then
-        log_error "No se pudo verificar autenticación a GitHub (ni SSH ni GitHub CLI)"
-        log_info "Configura SSH keys o ejecuta: gh auth login"
+    # Verificar GitHub CLI auth
+    if ! gh auth status >/dev/null 2>&1; then
+        log_error "GitHub CLI no está autenticado"
+        log_info "Ejecuta: gh auth login"
         exit 1
     fi
     
@@ -202,13 +157,6 @@ git_push_and_tag() {
 # Monitorear GitHub Actions
 monitor_github_actions() {
     log_step "3" "MONITOREANDO GITHUB ACTIONS"
-    
-    # Skip if GitHub CLI not available
-    if [ "$GH_CLI_AVAILABLE" = false ]; then
-        log_warning "GitHub CLI no disponible, saltando monitoreo de Actions"
-        log_info "Verifica manualmente el progreso en: https://github.com/$REPO_OWNER/$REPO_NAME/actions"
-        return 0
-    fi
     
     local start_time=$(date +%s)
     local end_time=$((start_time + MAX_WAIT_ACTIONS))
