@@ -3,18 +3,26 @@ import { logger } from '../config/logger.js';
 
 export class AppError extends Error {
   public details?: any;
-  
+  public statusCode: number;
+  public isOperational: boolean;
+
   constructor(
-    public statusCode: number,
+    statusCode: number,
     message: string | { message: string; [key: string]: any },
-    public isOperational = true
+    isOperational = true
   ) {
+    // Ensure we call the base Error constructor first with a string message
+    const textMessage = typeof message === 'object' ? (message.message || 'An error occurred') : message;
+    super(textMessage);
+
+    // Now it's safe to assign to this
+    this.statusCode = statusCode;
+    this.isOperational = isOperational;
+
     if (typeof message === 'object') {
-      super(message.message || 'An error occurred');
       this.details = message;
-    } else {
-      super(message);
     }
+
     Object.setPrototypeOf(this, AppError.prototype);
   }
 }

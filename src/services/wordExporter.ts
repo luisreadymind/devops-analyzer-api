@@ -285,12 +285,12 @@ export class WordExporterService {
       }),
     ];
 
-    // Agregar hallazgos principales
+    // Agregar hallazgos principales (usar bullet automático, no prefijar '•' en el texto)
     resumen.hallazgosPrincipales.forEach(h => {
       paragraphs.push(new Paragraph({
         children: [
           new TextRun({
-            text: `• ${h}`,
+            text: h,
             font: 'Aptos',
             size: 22,
           }),
