@@ -72,20 +72,27 @@ check_prerequisites() {
         exit 1
     fi
     
-    # Verificar GitHub CLI auth OR SSH keys available for push
-    if [ "$GH_CLI_AVAILABLE" = true ]; then
-        if ! gh auth status >/dev/null 2>&1; then
-            log_warning "GitHub CLI instalado pero no autenticado"
-            log_info "Se intentará usar SSH para push si hay claves configuradas"
+    # Verificar autenticación (SSH o GitHub CLI)
+    local auth_ok=false
+    
+    # Check SSH auth first
+    if ssh -T git@github.com >/dev/null 2>&1; then
+        log_info "SSH authentication to GitHub verified ✓"
+        auth_ok=true
+    fi
+    
+    # If SSH not working, check GitHub CLI
+    if [ "$auth_ok" = false ] && [ "$GH_CLI_AVAILABLE" = true ]; then
+        if gh auth status >/dev/null 2>&1; then
+            log_info "GitHub CLI authentication verified ✓"
+            auth_ok=true
         fi
-    else
-        # Check for SSH key existence
-        if [ -f "$HOME/.ssh/id_rsa.pub" ] || [ -f "$HOME/.ssh/id_ed25519.pub" ] || [ -n "$(ssh-add -l 2>/dev/null || true)" ]; then
-            log_info "SSH key disponible, se usará SSH para push"
-        else
-            log_warning "GitHub CLI no está instalado y no se detectó clave SSH. Se requiere al menos uno para push automático."
-            log_info "Instala GitHub CLI (gh) o configura claves SSH: https://docs.github.com/en/authentication/connecting-to-github-with-ssh"
-        fi
+    fi
+    
+    if [ "$auth_ok" = false ]; then
+        log_error "No se pudo verificar autenticación a GitHub (ni SSH ni GitHub CLI)"
+        log_info "Configura SSH keys o ejecuta: gh auth login"
+        exit 1
     fi
     
     # Verificar Azure CLI auth
@@ -151,23 +158,10 @@ git_push_and_tag() {
     log_info "Creando tag: $tag_name"
     git tag -a "$tag_name" -m "Deploy $BUILD_DATE"
     
-    # Prepare SSH push URL: prefer existing SSH remote if available, otherwise construct one
-    local remote_url=$(git remote get-url origin 2>/dev/null || true)
-    local ssh_push_url=""
-    if [[ "$remote_url" =~ ^git@github.com: ]]; then
-        ssh_push_url="$remote_url"
-    elif [[ "$remote_url" =~ ^https://github.com/ ]]; then
-        # derive ssh url from https
-        ssh_push_url="git@github.com:$REPO_OWNER/$REPO_NAME.git"
-    else
-        # fallback to constructed ssh url
-        ssh_push_url="git@github.com:$REPO_OWNER/$REPO_NAME.git"
-    fi
-
-    # Push using SSH URL to avoid GitHub CLI auth issues
-    log_info "Pushing to GitHub via SSH: $ssh_push_url"
-    git push "$ssh_push_url" main
-    git push "$ssh_push_url" --tags
+    # Push con tags
+    log_info "Haciendo push a GitHub..."
+    git push origin main
+    git push origin --tags
     
     log_success "Push completado ✓"
     log_info "Tag creado: $tag_name"
@@ -181,6 +175,13 @@ git_push_and_tag() {
 # Monitorear GitHub Actions
 monitor_github_actions() {
     log_step "3" "MONITOREANDO GITHUB ACTIONS"
+    
+    # Skip if GitHub CLI not available
+    if [ "$GH_CLI_AVAILABLE" = false ]; then
+        log_warning "GitHub CLI no disponible, saltando monitoreo de Actions"
+        log_info "Verifica manualmente el progreso en: https://github.com/$REPO_OWNER/$REPO_NAME/actions"
+        return 0
+    fi
     
     local start_time=$(date +%s)
     local end_time=$((start_time + MAX_WAIT_ACTIONS))
