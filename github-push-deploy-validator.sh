@@ -75,10 +75,27 @@ check_prerequisites() {
     # Verificar autenticación (SSH o GitHub CLI)
     local auth_ok=false
     
-    # Check SSH auth first
+    # Check SSH auth first - ensure agent is running
+    log_info "Verificando SSH authentication..."
+    
+    # Start SSH agent if not running
+    if [ -z "$SSH_AGENT_PID" ]; then
+        log_info "Iniciando SSH agent..."
+        eval "$(ssh-agent -s)" >/dev/null 2>&1
+    fi
+    
+    # Add SSH key if not loaded
+    if ! ssh-add -l >/dev/null 2>&1; then
+        log_info "Cargando SSH key..."
+        ssh-add ~/.ssh/id_rsa >/dev/null 2>&1 || ssh-add ~/.ssh/id_ed25519 >/dev/null 2>&1
+    fi
+    
+    # Test SSH connection
     if ssh -T git@github.com >/dev/null 2>&1; then
         log_info "SSH authentication to GitHub verified ✓"
         auth_ok=true
+    else
+        log_info "SSH authentication failed"
     fi
     
     # If SSH not working, check GitHub CLI
