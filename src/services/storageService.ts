@@ -58,10 +58,16 @@ export async function uploadHtmlToBlob(
     const blobServiceClient = getBlobServiceClient();
     const containerClient = blobServiceClient.getContainerClient(containerName);
 
-    // Ensure container exists (private access now)
-    await containerClient.createIfNotExists({
-      access: 'blob'
-    });
+    // Ensure container exists. Avoid forcing public access because some storage
+    // accounts disable public access at the account level (PublicAccessNotPermitted).
+    try {
+      await containerClient.createIfNotExists();
+    } catch (err: any) {
+      // If the account forbids public access, createIfNotExists without access
+      // should still succeed; if we hit an error here, log and rethrow.
+      logger.warn({ err }, 'createIfNotExists failed; continuing if container exists');
+      // rethrow only if it's not a conditional failure (we will let upload fail later)
+    }
 
     const blockBlobClient = containerClient.getBlockBlobClient(fileName);
 
@@ -103,9 +109,11 @@ export async function uploadJsonToBlob(
     const blobServiceClient = getBlobServiceClient();
     const containerClient = blobServiceClient.getContainerClient(containerName);
 
-    await containerClient.createIfNotExists({
-      access: 'blob'
-    });
+    try {
+      await containerClient.createIfNotExists();
+    } catch (err: any) {
+      logger.warn({ err }, 'createIfNotExists failed; continuing if container exists');
+    }
 
     const blockBlobClient = containerClient.getBlockBlobClient(fileName);
 
