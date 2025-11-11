@@ -22,6 +22,45 @@ TOTAL_FILES_DELETED=0
 TOTAL_SIZE_FREED=0
 START_TIME=$(date +%s)
 
+# Patrones a excluir (no eliminar): archivos de test y deploy
+EXCLUDE_PATTERNS=(
+    "test*"
+    "test_*"
+    "test-*.json"
+    "test-*.pdf"
+    "test-*.sh"
+    "test-*.py"
+    "test_*.*"
+    "deploy*"
+    "deploy-*"
+    "deployments"
+    "deployments/*"
+    # Archivos específicos a excluir
+    "github-push-deploy-validator.sh"
+    "test_export_word.py"
+    "test_generate_report.py"
+    "test_json.json"
+    "test-export-word.js"
+    "cleanup-api-workspace.sh"
+)
+
+# Comprueba si un archivo/directorio debe excluirse de la limpieza
+is_excluded() {
+    local target="$1"
+    local base
+    base=$(basename "$target")
+    for p in "${EXCLUDE_PATTERNS[@]}"; do
+        case "$base" in
+            $p) return 0 ;;
+        esac
+    done
+    # También excluir si la ruta contiene "deployments" o "test"
+    if [[ "$target" == *deployments* ]] || [[ "$target" == *test* ]]; then
+        return 0
+    fi
+    return 1
+}
+
 # Banner inicial
 echo -e "${PURPLE}"
 echo "╔══════════════════════════════════════════════════════════════════════════════════╗"
@@ -66,6 +105,11 @@ delete_file() {
     local file=$1
     local reason=$2
     
+    if is_excluded "$file"; then
+        echo -e "  ${YELLOW}!${NC} Omitido (excluido): ${YELLOW}$(basename \"$file\")${NC} - $reason"
+        return 0
+    fi
+
     if [[ -f "$file" ]]; then
         local size=$(get_file_size "$file")
         rm -f "$file"
@@ -85,7 +129,9 @@ delete_pattern() {
     local reason=$2
     
     for file in $pattern; do
-        if [[ -f "$file" ]]; then
+        if is_excluded "$file"; then
+            echo -e "  ${YELLOW}!${NC} Omitido (excluido): ${YELLOW}$(basename \"$file\")${NC} - $reason"
+        elif [[ -f "$file" ]]; then
             delete_file "$file" "$reason"
         fi
     done
@@ -140,7 +186,7 @@ delete_file "publish-profile.xml" "perfil de publicación obsoleto"
 show_progress 7
 echo -e "\n${CYAN}🏗️ PASO 7: Limpiando directorio dist...${NC}"
 if [[ -d "dist" ]]; then
-    local dist_files=$(find dist -type f 2>/dev/null | wc -l)
+    dist_files=$(find dist -type f 2>/dev/null | wc -l)
     if [[ $dist_files -gt 0 ]]; then
         echo -e "  ${BLUE}ℹ️${NC} Encontrados $dist_files archivos en dist/"
         find dist -type f -exec rm -f {} \;
@@ -154,20 +200,14 @@ fi
 # PASO 8: Limpiar deployments temporales
 show_progress 8
 echo -e "\n${CYAN}🚀 PASO 8: Limpiando deployments temporales...${NC}"
-if [[ -d "deployments" ]]; then
-    # Mantener solo el deployment activo
-    if [[ -f "deployments/active" ]]; then
-        local active_deployment=$(cat deployments/active 2>/dev/null)
-        echo -e "  ${BLUE}ℹ️${NC} Deployment activo: $active_deployment"
-        
-        # Eliminar deployments que no sean el activo
-        find deployments -mindepth 1 -maxdepth 1 -type d ! -name "$active_deployment" -exec rm -rf {} \; 2>/dev/null
-        
-        # Eliminar archivos temporales en deployments
-        find deployments -name "temp-*" -type d -exec rm -rf {} \; 2>/dev/null
-        echo -e "  ${GREEN}✓${NC} Deployments temporales eliminados"
+    if [[ -d "deployments" ]]; then
+        # Por seguridad no eliminamos contenido de 'deployments' para preservar artefactos y pruebas de deploy
+        if [[ -f "deployments/active" ]]; then
+            active_deployment=$(cat deployments/active 2>/dev/null)
+            echo -e "  ${BLUE}ℹ️${NC} Deployment activo: $active_deployment"
+        fi
+        echo -e "  ${YELLOW}!${NC} Se omite la limpieza de 'deployments/' para preservar archivos de despliegue"
     fi
-fi
 
 # PASO 9: Limpiar node_modules innecesarios (solo archivos de cache)
 show_progress 9
