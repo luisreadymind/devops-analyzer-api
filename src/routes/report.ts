@@ -4,7 +4,7 @@ import { AppError } from '../middleware/errors.js';
 import { extractTextFromPdf } from '../services/pdf.js';
 import { analyzePdfWithOpenAI } from '../services/aiService.js';
 import { generateDashboardHtml } from '../services/htmlExporter.js';
-import { uploadHtmlToBlob, uploadJsonToBlob } from '../services/storageService.js';
+import { uploadHtmlToBlob, uploadJsonToBlob, uploadWordToBlob } from '../services/storageService.js';
 import { WordExporterService } from '../services/wordExporter.js';
 import { logger } from '../config/logger.js';
 
@@ -138,6 +138,70 @@ router.post('/export-word', async (req: Request, res: Response) => {
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     logger.error({ error: errorMessage }, 'Error generating Word document');
+    throw error;
+  }
+});
+
+router.post('/generate-full-report', async (req: Request, res: Response) => {
+  try {
+    const analysisData = req.body;
+
+    // Validar que se recibió un JSON válido
+    if (!analysisData || typeof analysisData !== 'object') {
+      throw new AppError(400, 'Invalid JSON data. Please provide a valid DevOps analysis JSON.');
+    }
+
+    // Validar campos requeridos
+    const requiredFields = ['cliente', 'capacidadWAF', 'recomendaciones', 'planTrabajo'];
+    for (const field of requiredFields) {
+      if (!analysisData[field]) {
+        throw new AppError(400, `Missing required field: ${field}`);
+      }
+    }
+
+    logger.info({ cliente: analysisData.cliente }, 'Processing full report generation request');
+
+    // Generar HTML dashboard
+    const htmlContent = generateDashboardHtml(analysisData);
+
+    // Generar documento Word
+    const wordExporter = new WordExporterService();
+    const wordBuffer = await wordExporter.generateDevOpsReportWord(analysisData);
+
+    // Generar timestamp y nombres de archivos
+    const timestamp = Date.now();
+    const cliente = analysisData.cliente.replace(/[^a-zA-Z0-9]/g, '_');
+    const fecha = analysisData.fechaAssessment || new Date().toISOString().split('T')[0];
+
+    const htmlFileName = `report_${timestamp}_${cliente}_${fecha}.html`;
+    const jsonFileName = `report_${timestamp}_${cliente}_${fecha}.json`;
+    const wordFileName = `report_${timestamp}_${cliente}_${fecha}.docx`;
+
+    // Subir HTML al blob storage
+    const htmlUrl = await uploadHtmlToBlob(htmlContent, htmlFileName);
+
+    // Subir JSON al blob storage
+    const jsonContent = JSON.stringify(analysisData, null, 2);
+    const jsonUrl = await uploadJsonToBlob(jsonContent, jsonFileName);
+
+    // Subir Word al blob storage
+    const wordUrl = await uploadWordToBlob(wordBuffer, wordFileName);
+
+    logger.info({ htmlUrl, jsonUrl, wordUrl }, 'Full report generated and uploaded successfully');
+
+    // Devolver respuesta con las URLs
+    res.json({
+      status: 'success',
+      data: {
+        htmlUrl,
+        jsonUrl,
+        wordUrl,
+        analysis: analysisData
+      }
+    });
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    logger.error({ error: errorMessage }, 'Error generating full report');
     throw error;
   }
 });

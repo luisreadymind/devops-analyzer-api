@@ -146,3 +146,49 @@ export async function uploadJsonToBlob(
     throw new Error('Failed to upload JSON to storage. Please try again.');
   }
 }
+
+export async function uploadWordToBlob(
+  wordBuffer: Buffer,
+  fileName: string
+): Promise<string> {
+  try {
+    const blobServiceClient = getBlobServiceClient();
+    const containerClient = blobServiceClient.getContainerClient(containerName);
+
+    try {
+      await containerClient.createIfNotExists();
+    } catch (err: any) {
+      logger.warn({ err }, 'createIfNotExists failed; continuing if container exists');
+    }
+
+    const blockBlobClient = containerClient.getBlockBlobClient(fileName);
+
+    logger.info({ 
+      fileName, 
+      containerName, 
+      contentLength: wordBuffer.length 
+    }, 'Uploading Word document to blob storage');
+
+    await blockBlobClient.upload(wordBuffer, wordBuffer.length, {
+      blobHTTPHeaders: {
+        blobContentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        blobCacheControl: 'public, max-age=3600'
+      }
+    });
+
+    // Generate URL with SAS token
+    const accountKey = process.env.AZURE_STORAGE_ACCOUNT_KEY;
+    const sasToken = generateSasToken(fileName, accountKey);
+    
+    const blobUrl = sasToken 
+      ? `${blockBlobClient.url}?${sasToken}`
+      : blockBlobClient.url;
+
+    logger.info({ blobUrl: blobUrl.substring(0, 80) + '...' }, 'Word document uploaded successfully with SAS token');
+
+    return blobUrl;
+  } catch (error) {
+    logger.error({ error, fileName }, 'Failed to upload Word document to blob storage');
+    throw new Error('Failed to upload Word document to storage. Please try again.');
+  }
+}
